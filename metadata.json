@@ -1,0 +1,13 @@
+{
+  "name": "Status Widget",
+  "description": "Simple status indicators for background AI tools and processes",
+  "uuid": "status-widget@nmalik.github.io",
+  "shell-version": [
+    "45",
+    "46",
+    "47"
+  ],
+  "version": 1,
+  "url": "https://github.com/nmalik/gnome-extension-status-widget",
+  "settings-schema": "org.gnome.shell.extensions.status-widget"
+} 

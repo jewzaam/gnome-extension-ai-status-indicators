@@ -277,7 +277,7 @@ gdbus call --session --dest org.gnome.Shell \
 
 ### File Structure
 ```
-gnome-extension-status-widget/
+gnome-extension-ai-status-indicators/
 ├── extension.js           # Main extension logic
 ├── prefs.js              # Preferences UI
 ├── metadata.json         # Extension metadata

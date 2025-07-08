@@ -9,6 +9,6 @@
     "47"
   ],
   "version": 1,
-  "url": "https://github.com/nmalik/gnome-extension-status-widget",
+  "url": "https://github.com/nmalik/gnome-extension-ai-status-indicators",
   "settings-schema": "org.gnome.shell.extensions.status-widget"
 } 

@@ -449,6 +449,30 @@ journalctl -f -o cat | grep -i "status.widget"
 - **API tests** - Validate external interfaces and contracts
 - **Error handling** - Test failure scenarios and edge cases
 
+#### Continuous Integration
+
+The project includes GitHub Actions workflows that automatically run on pull requests:
+
+**✅ Automated Checks:**
+- **Code Quality** - ESLint checks for JavaScript code style and potential issues
+- **Test Suite** - Jest unit tests with full coverage reporting
+- **Script Validation** - Verification that install/uninstall scripts contain correct UUIDs
+- **Metadata Validation** - Ensures extension metadata is consistent across files
+- **Coverage Upload** - Test coverage reports uploaded to Codecov
+
+**🔧 Workflow Triggers:**
+- **Pull Requests** - All checks run on PRs targeting main branch
+- **Push to Main** - Validation runs on direct commits to main
+- **Manual Dispatch** - Workflows can be triggered manually via GitHub UI
+
+**📊 Requirements:**
+- All linting checks must pass
+- Test suite must have 100% pass rate
+- Extension UUID must be consistent across all files
+- Scripts must be executable and contain correct references
+
+All checks must pass before PRs can be merged to maintain code quality and prevent regressions.
+
 #### Development Workflow
 
 **Running Tests During Development:**

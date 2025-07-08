@@ -157,6 +157,60 @@ export default class StatusWidgetPreferences extends ExtensionPreferences {
 
         page.add(generalGroup);
 
+        // Security group
+        const securityGroup = new Adw.PreferencesGroup({
+            title: _('Security')
+        });
+
+        // Max indicators per app
+        const maxIndicatorsRow = new Adw.SpinRow({
+            title: _('Max Indicators per App'),
+            subtitle: _('Maximum number of indicators each application can create'),
+            adjustment: new Gtk.Adjustment({
+                lower: 1,
+                upper: 20,
+                step_increment: 1,
+                page_increment: 5,
+                value: settings.get_int('max-indicators-per-app')
+            })
+        });
+
+        maxIndicatorsRow.connect('notify::value', () => {
+            settings.set_int('max-indicators-per-app', maxIndicatorsRow.get_value());
+        });
+
+        securityGroup.add(maxIndicatorsRow);
+
+        // Rate limit
+        const rateLimitRow = new Adw.SpinRow({
+            title: _('Rate Limit (ms)'),
+            subtitle: _('Minimum time between D-Bus calls from the same application'),
+            adjustment: new Gtk.Adjustment({
+                lower: 50,
+                upper: 5000,
+                step_increment: 50,
+                page_increment: 100,
+                value: settings.get_int('rate-limit-ms')
+            })
+        });
+
+        rateLimitRow.connect('notify::value', () => {
+            settings.set_int('rate-limit-ms', rateLimitRow.get_value());
+        });
+
+        securityGroup.add(rateLimitRow);
+
+        // Enable logging
+        const enableLoggingRow = new Adw.SwitchRow({
+            title: _('Enable Security Logging'),
+            subtitle: _('Log D-Bus calls and security events for monitoring')
+        });
+
+        settings.bind('enable-logging', enableLoggingRow, 'active', Gio.SettingsBindFlags.DEFAULT);
+        securityGroup.add(enableLoggingRow);
+
+        page.add(securityGroup);
+
         // Indicators group
         const indicatorsGroup = new Adw.PreferencesGroup({
             title: _('Indicators')

@@ -215,6 +215,17 @@ describe('StatusIndicator', () => {
             
             expect(indicatorWithLabel._textLabel.text).toBe('Updated AI');
         });
+
+        test('should handle invalid icons gracefully', () => {
+            indicator.updateConfig('AI', undefined, null, '', false);
+            expect(indicator._readyIcon).toBeUndefined();
+            expect(indicator._workingIcon).toBeNull();
+            expect(indicator._waitingIcon).toBe('');
+            // Should not throw when setting status
+            expect(() => indicator.setStatus('ready')).not.toThrow();
+            expect(() => indicator.setStatus('working')).not.toThrow();
+            expect(() => indicator.setStatus('waiting')).not.toThrow();
+        });
     });
 
     describe('status transitions', () => {
@@ -235,4 +246,4 @@ describe('StatusIndicator', () => {
             expect(indicator._iconLabel.text).toBe('✅');
         });
     });
-}); 
+});

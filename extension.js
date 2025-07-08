@@ -170,6 +170,8 @@ export default class StatusWidgetExtension extends Extension {
         this._widget = null;
         this._settings = null;
         this._settingsConnections = [];
+        this._applicationLimits = new Map(); // Track indicators per application
+        this._lastUpdateTime = new Map(); // Rate limiting
     }
 
     enable() {
@@ -211,6 +213,10 @@ export default class StatusWidgetExtension extends Extension {
             this._dbusImpl.unexport();
             this._dbusImpl = null;
         }
+        
+        // Clear security tracking
+        this._applicationLimits.clear();
+        this._lastUpdateTime.clear();
         
         this._settings = null;
     }
@@ -313,23 +319,156 @@ export default class StatusWidgetExtension extends Extension {
         this._dbusImpl.export(Gio.DBus.session, '/org/gnome/shell/extensions/StatusWidget');
     }
 
-    // D-Bus methods
-    SetIndicatorStatus(id, status) {
-        if (this._widget) {
-            this._widget.setIndicatorStatus(id, status);
+    _validateInput(text, maxLength = 50) {
+        if (!text || typeof text !== 'string') {
+            return '';
         }
+        
+        // Remove potentially dangerous characters and limit length
+        const sanitized = text
+            .replace(/[<>&"']/g, '') // Remove HTML/XML characters
+            .replace(/[\x00-\x1F\x7F]/g, '') // Remove control characters
+            .slice(0, maxLength);
+            
+        return sanitized;
+    }
+
+    _getCallerInfo() {
+        // In a real implementation, we'd get the D-Bus sender
+        // For now, we'll use a simple approach
+        const stack = new Error().stack;
+        const caller = stack ? stack.split('\n')[3] : 'unknown';
+        return caller.includes('example-client') ? 'example-client' : 'unknown-app';
+    }
+
+    _checkRateLimit(appId) {
+        const now = Date.now();
+        const lastUpdate = this._lastUpdateTime.get(appId) || 0;
+        const rateLimitMs = this._settings.get_int('rate-limit-ms');
+        
+        if (now - lastUpdate < rateLimitMs) {
+            if (this._settings.get_boolean('enable-logging')) {
+                console.warn(`Rate limit exceeded for application: ${appId}`);
+            }
+            return false;
+        }
+        
+        this._lastUpdateTime.set(appId, now);
+        return true;
+    }
+
+    _checkIndicatorLimit(appId) {
+        const currentCount = this._applicationLimits.get(appId) || 0;
+        const maxIndicators = this._settings.get_int('max-indicators-per-app');
+        
+        if (currentCount >= maxIndicators) {
+            if (this._settings.get_boolean('enable-logging')) {
+                console.warn(`Indicator limit exceeded for application: ${appId} (${currentCount}/${maxIndicators})`);
+            }
+            return false;
+        }
+        
+        return true;
+    }
+
+    // D-Bus methods with security validation
+    SetIndicatorStatus(id, status) {
+        if (!this._widget) return;
+        
+        const appId = this._getCallerInfo();
+        
+        // Rate limiting
+        if (!this._checkRateLimit(appId)) {
+            return;
+        }
+        
+        // Input validation
+        const validId = this._validateInput(id, 30);
+        const validStatus = this._validateInput(status, 20);
+        
+        // Only allow valid status values
+        if (!['ready', 'working', 'waiting'].includes(validStatus)) {
+            if (this._settings.get_boolean('enable-logging')) {
+                console.warn(`Invalid status value: ${status} from ${appId}`);
+            }
+            return;
+        }
+        
+        this._widget.setIndicatorStatus(validId, validStatus);
     }
 
     AddIndicator(id, name, readyIcon = '✅', workingIcon = '⚠️', waitingIcon = '⛔') {
-        if (this._widget) {
-            const showLabels = this._settings.get_boolean('show-labels');
-            this._widget.addIndicator(id, name, readyIcon, workingIcon, waitingIcon, showLabels);
+        if (!this._widget) return;
+        
+        const appId = this._getCallerInfo();
+        
+        // Rate limiting
+        if (!this._checkRateLimit(appId)) {
+            return;
+        }
+        
+        // Check indicator limit per application
+        if (!this._checkIndicatorLimit(appId)) {
+            return;
+        }
+        
+        // Input validation
+        const validId = this._validateInput(id, 30);
+        const validName = this._validateInput(name, 50);
+        const validReadyIcon = this._validateInput(readyIcon, 10);
+        const validWorkingIcon = this._validateInput(workingIcon, 10);
+        const validWaitingIcon = this._validateInput(waitingIcon, 10);
+        
+        // Ensure we have valid inputs
+        if (!validId || !validName) {
+            if (this._settings.get_boolean('enable-logging')) {
+                console.warn(`Invalid parameters for AddIndicator from ${appId}`);
+            }
+            return;
+        }
+        
+        // Track indicator count for this application
+        const currentCount = this._applicationLimits.get(appId) || 0;
+        this._applicationLimits.set(appId, currentCount + 1);
+        
+        const showLabels = this._settings.get_boolean('show-labels');
+        this._widget.addIndicator(validId, validName, validReadyIcon, validWorkingIcon, validWaitingIcon, showLabels);
+        
+        if (this._settings.get_boolean('enable-logging')) {
+            console.log(`Added indicator '${validName}' (${validId}) from ${appId}`);
         }
     }
 
     RemoveIndicator(id) {
-        if (this._widget) {
-            this._widget.removeIndicator(id);
+        if (!this._widget) return;
+        
+        const appId = this._getCallerInfo();
+        
+        // Rate limiting
+        if (!this._checkRateLimit(appId)) {
+            return;
+        }
+        
+        // Input validation
+        const validId = this._validateInput(id, 30);
+        
+        if (!validId) {
+            if (this._settings.get_boolean('enable-logging')) {
+                console.warn(`Invalid indicator ID for RemoveIndicator from ${appId}`);
+            }
+            return;
+        }
+        
+        // Decrease count for this application
+        const currentCount = this._applicationLimits.get(appId) || 0;
+        if (currentCount > 0) {
+            this._applicationLimits.set(appId, currentCount - 1);
+        }
+        
+        this._widget.removeIndicator(validId);
+        
+        if (this._settings.get_boolean('enable-logging')) {
+            console.log(`Removed indicator ${validId} from ${appId}`);
         }
     }
 } 

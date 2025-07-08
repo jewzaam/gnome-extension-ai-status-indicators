@@ -215,6 +215,28 @@ describe('StatusWidgetExtension', () => {
         });
     });
 
+    describe('settings persistence', () => {
+        test('should persist indicators across disable/enable', () => {
+            extension.enable();
+            const indicators = [{
+                id: 'persist-id',
+                name: 'Persist AI',
+                readyIcon: '✅',
+                workingIcon: '⚠️',
+                waitingIcon: '⛔'
+            }];
+            extension._settings.set_string('indicators', JSON.stringify(indicators));
+            extension._loadIndicators();
+            extension.disable();
+            extension.enable();
+            expect(extension._widget).toBeDefined();
+            extension._loadIndicators();
+            expect(extension._widget.addIndicator).toHaveBeenCalledWith(
+                'persist-id', 'Persist AI', '✅', '⚠️', '⛔', false
+            );
+        });
+    });
+
     describe('panel positioning', () => {
         beforeEach(() => {
             extension.enable();
@@ -312,6 +334,35 @@ describe('StatusWidgetExtension', () => {
         });
     });
 
+    describe('D-Bus parameter validation', () => {
+        beforeEach(() => {
+            extension.enable();
+        });
+        afterEach(() => {
+            extension.disable();
+        });
+        test('should handle missing arguments in D-Bus methods', () => {
+            expect(() => extension.SetIndicatorStatus()).not.toThrow();
+            expect(() => extension.AddIndicator()).not.toThrow();
+            expect(() => extension.RemoveIndicator()).not.toThrow();
+        });
+    });
+
+    describe('panel positioning edge cases', () => {
+        beforeEach(() => {
+            extension.enable();
+        });
+        afterEach(() => {
+            extension.disable();
+        });
+        test('should handle invalid position value', () => {
+            extension._settings.set_string('position', 'invalid');
+            expect(() => extension._updatePosition()).not.toThrow();
+            // Should default to right panel
+            expect(Main.panel._rightBox.children).toContain(extension._widget);
+        });
+    });
+
     describe('error handling', () => {
         test('should handle enable errors gracefully', () => {
             // Mock a failure in getSettings
@@ -330,4 +381,4 @@ describe('StatusWidgetExtension', () => {
             expect(() => extension.disable()).not.toThrow();
         });
     });
-}); 
+});

@@ -17,5 +17,20 @@
       <summary>Show indicator labels</summary>
       <description>Whether to show text labels next to indicators</description>
     </key>
+    <key name="max-indicators-per-app" type="i">
+      <default>5</default>
+      <summary>Maximum indicators per application</summary>
+      <description>Maximum number of indicators each application can create</description>
+    </key>
+    <key name="rate-limit-ms" type="i">
+      <default>100</default>
+      <summary>Rate limit in milliseconds</summary>
+      <description>Minimum time between D-Bus calls from the same application</description>
+    </key>
+    <key name="enable-logging" type="b">
+      <default>true</default>
+      <summary>Enable security logging</summary>
+      <description>Log D-Bus calls and security events for monitoring</description>
+    </key>
   </schema>
 </schemalist> 

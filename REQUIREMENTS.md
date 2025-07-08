@@ -50,6 +50,13 @@ A GNOME Shell extension that displays configurable status indicators for backgro
 3. **Background Processes**: Any long-running task requiring status visibility
 4. **Multi-tasking**: Quick glance status without window switching
 
+## Security Requirements
+- **Input Validation**: All D-Bus inputs must be sanitized and validated
+- **Rate Limiting**: Prevent spam attacks with configurable rate limits
+- **Resource Limits**: Limit indicators per application to prevent abuse
+- **Logging**: Optional security event logging for monitoring
+- **User Control**: All security settings configurable via preferences
+
 ## Non-Requirements
 - Real-time animations or transitions
 - Audio notifications
@@ -60,4 +67,5 @@ A GNOME Shell extension that displays configurable status indicators for backgro
 - Reduces context switching when waiting for AI tools
 - Provides at-a-glance status without interrupting workflow
 - Easy to configure and customize
-- Minimal system resource impact 
+- Minimal system resource impact
+- Secure D-Bus interface with input validation and rate limiting 

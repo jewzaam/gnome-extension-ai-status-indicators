@@ -3,7 +3,25 @@
 global.imports = {
     gi: {
         GObject: {
-            registerClass: (cls) => cls,
+            registerClass: (cls) => {
+                // Create a proper constructor that extends the base class
+                const Constructor = function(...args) {
+                    // Call parent constructor if it exists
+                    if (cls.prototype.__proto__ && cls.prototype.__proto__.constructor) {
+                        cls.prototype.__proto__.constructor.call(this);
+                    }
+                    // Call the _init method if it exists
+                    if (this._init) {
+                        this._init(...args);
+                    }
+                };
+
+                // Set up prototype chain properly
+                Constructor.prototype = Object.create(cls.prototype);
+                Constructor.prototype.constructor = Constructor;
+
+                return Constructor;
+            },
             TYPE_NONE: 0,
             TYPE_BOOLEAN: 1,
             TYPE_STRING: 2,
@@ -16,6 +34,10 @@ global.imports = {
         St: {
             BoxLayout: class MockBoxLayout {
                 constructor(params = {}) {
+                    this._init(params);
+                }
+
+                _init(params = {}) {
                     this.style_class = params.style_class;
                     this.reactive = params.reactive;
                     this.can_focus = params.can_focus;
@@ -47,6 +69,10 @@ global.imports = {
             },
             Label: class MockLabel {
                 constructor(params = {}) {
+                    this._init(params);
+                }
+
+                _init(params = {}) {
                     this.text = params.text || '';
                     this.y_align = params.y_align;
                     this.style_class = params.style_class;
@@ -64,6 +90,11 @@ global.imports = {
                 MIDDLE: 'middle',
                 START: 'start',
                 END: 'end'
+            }
+        },
+        Clutter: {
+            ActorAlign: {
+                CENTER: 'center'
             }
         },
         Gio: {
@@ -228,4 +259,18 @@ global.console = {
     log: jest.fn(),
     error: jest.fn(),
     warn: jest.fn()
+};
+
+// Export mocked modules for direct import in tests
+module.exports = {
+    GObject: global.imports.gi.GObject,
+    St: global.imports.gi.St,
+    Clutter: global.imports.gi.Clutter,
+    Gio: global.imports.gi.Gio,
+    GLib: global.imports.gi.GLib,
+    Main: global.Main,
+    PanelMenu: global.PanelMenu,
+    Extension: global.Extension,
+    gettext: global.gettext,
+    _: global._
 };

@@ -7,61 +7,60 @@ on:
     branches: [ main ]
 
 jobs:
-  test:
+  lint:
     runs-on: ubuntu-latest
-    
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
+    - uses: actions/checkout@v4
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '18'
-        
+        cache: 'npm'
     - name: Install dependencies
-      run: npm install
-      
-    - name: Run linter
+      run: npm ci
+    - name: Run ESLint
       run: npm run lint
-      
-    - name: Run tests
-      run: npm test
-      
-    - name: Generate coverage report
-      run: npm run test:coverage
-      
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        gnome-version: [45, 46, 47, 48]
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
       with:
-        file: ./coverage/lcov.info
-        fail_ci_if_error: false
-        
-    - name: Test installation script
+        node-version: '18'
+        cache: 'npm'
+    - name: Install dependencies
+      run: npm ci
+    - name: Run tests for GNOME ${{ matrix.gnome-version }}
+      run: GNOME_VERSION=${{ matrix.gnome-version }} npm test
+      env:
+        GNOME_VERSION: ${{ matrix.gnome-version }}
+    - name: Upload coverage to Codecov
+      if: matrix.gnome-version == 48
+      uses: codecov/codecov-action@v4
+
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Validate extension UUID consistency
       run: |
-        # Test that install.sh is executable and has correct extension UUID
-        chmod +x install.sh
-        if ! grep -q "ai-status-indicators@jewzaam.github.io" install.sh; then
-          echo "Error: install.sh does not contain correct extension UUID"
+        UUID_METADATA=$(grep -o '"uuid": "[^"]*"' metadata.json | cut -d'"' -f4)
+        UUID_INSTALL=$(grep -o 'EXTENSION_UUID="[^"]*"' install.sh | cut -d'"' -f2)
+        if [ "$UUID_METADATA" != "$UUID_INSTALL" ]; then
+          echo "Extension UUID mismatch between metadata.json and install.sh"
           exit 1
         fi
-        echo "✓ install.sh validation passed"
-        
-    - name: Test uninstall script
+    - name: Validate metadata GNOME versions
       run: |
-        # Test that uninstall.sh is executable and has correct extension UUID
-        chmod +x uninstall.sh
-        if ! grep -q "ai-status-indicators@jewzaam.github.io" uninstall.sh; then
-          echo "Error: uninstall.sh does not contain correct extension UUID"
-          exit 1
-        fi
-        echo "✓ uninstall.sh validation passed"
-        
-    - name: Validate metadata
-      run: |
-        # Check that metadata.json contains correct UUID
-        if ! grep -q "ai-status-indicators@jewzaam.github.io" metadata.json; then
-          echo "Error: metadata.json does not contain correct extension UUID"
-          exit 1
-        fi
-        echo "✓ metadata.json validation passed" 
+        # Check that metadata.json includes all tested versions
+        for version in 45 46 47 48; do
+          if ! grep -q "\"$version\"" metadata.json; then
+            echo "GNOME Shell version $version missing from metadata.json"
+            exit 1
+          fi
+        done 

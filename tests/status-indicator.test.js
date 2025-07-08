@@ -49,16 +49,16 @@ class StatusIndicator extends St.BoxLayout {
         this._status = status;
         let icon;
         switch (status) {
-            case 'working':
-                icon = this._workingIcon;
-                break;
-            case 'waiting':
-                icon = this._waitingIcon;
-                break;
-            case 'ready':
-            default:
-                icon = this._readyIcon;
-                break;
+        case 'working':
+            icon = this._workingIcon;
+            break;
+        case 'waiting':
+            icon = this._waitingIcon;
+            break;
+        case 'ready':
+        default:
+            icon = this._readyIcon;
+            break;
         }
         this._iconLabel.set_text(icon);
     }
@@ -72,9 +72,9 @@ class StatusIndicator extends St.BoxLayout {
         this._readyIcon = readyIcon;
         this._workingIcon = workingIcon;
         this._waitingIcon = waitingIcon;
-        
+
         this.setStatus(this._status);
-        
+
         if (this._showLabel !== showLabel) {
             this._showLabel = showLabel;
             if (showLabel && !this._textLabel) {
@@ -89,7 +89,7 @@ class StatusIndicator extends St.BoxLayout {
                 this._textLabel = null;
             }
         }
-        
+
         if (this._textLabel) {
             this._textLabel.set_text(this._name);
         }
@@ -105,7 +105,7 @@ describe('StatusIndicator', () => {
     beforeEach(() => {
         // Reset mocks
         jest.clearAllMocks();
-        
+
         // Create a new indicator for each test
         indicator = new StatusIndicator('Test AI', '✅', '⚠️', '⛔', false);
     });
@@ -183,7 +183,7 @@ describe('StatusIndicator', () => {
     describe('updateConfig', () => {
         test('should update icons and name', () => {
             indicator.updateConfig('New AI', '🟢', '🟡', '🔴', false);
-            
+
             expect(indicator._name).toBe('New AI');
             expect(indicator._readyIcon).toBe('🟢');
             expect(indicator._workingIcon).toBe('🟡');
@@ -194,15 +194,15 @@ describe('StatusIndicator', () => {
         test('should update display when status changes', () => {
             indicator.setStatus('working');
             indicator.updateConfig('New AI', '🟢', '🟡', '🔴', false);
-            
+
             expect(indicator._iconLabel.text).toBe('🟡'); // Should show working icon
         });
 
         test('should add text label when showLabel changes to true', () => {
             expect(indicator._textLabel).toBeUndefined();
-            
+
             indicator.updateConfig('New AI', '✅', '⚠️', '⛔', true);
-            
+
             expect(indicator._textLabel).toBeDefined();
             expect(indicator._textLabel.text).toBe('New AI');
         });
@@ -211,18 +211,18 @@ describe('StatusIndicator', () => {
             // First create indicator with label
             const indicatorWithLabel = new StatusIndicator('Test AI', '✅', '⚠️', '⛔', true);
             expect(indicatorWithLabel._textLabel).toBeDefined();
-            
+
             // Then update to remove label
             indicatorWithLabel.updateConfig('Test AI', '✅', '⚠️', '⛔', false);
-            
+
             expect(indicatorWithLabel._textLabel).toBeNull();
         });
 
         test('should update text label content when name changes', () => {
             const indicatorWithLabel = new StatusIndicator('Test AI', '✅', '⚠️', '⛔', true);
-            
+
             indicatorWithLabel.updateConfig('Updated AI', '✅', '⚠️', '⛔', true);
-            
+
             expect(indicatorWithLabel._textLabel.text).toBe('Updated AI');
         });
 
@@ -247,15 +247,15 @@ describe('StatusIndicator', () => {
         test('should handle complete status cycle', () => {
             // Start ready
             expect(indicator._iconLabel.text).toBe('✅');
-            
+
             // Go to working
             indicator.setStatus('working');
             expect(indicator._iconLabel.text).toBe('⚠️');
-            
+
             // Go to waiting
             indicator.setStatus('waiting');
             expect(indicator._iconLabel.text).toBe('⛔');
-            
+
             // Back to ready
             indicator.setStatus('ready');
             expect(indicator._iconLabel.text).toBe('✅');

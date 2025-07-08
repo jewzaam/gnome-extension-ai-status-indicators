@@ -202,7 +202,7 @@ const StatusWidget = GObject.registerClass(
         }
 
         clearIndicators() {
-            for (const [id, indicator] of this._indicators) {
+            for (const [, indicator] of this._indicators) {
                 this._container.remove_child(indicator);
                 indicator._cleanup(); // Clean up tooltip
             }

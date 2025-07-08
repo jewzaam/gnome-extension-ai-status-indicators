@@ -273,7 +273,7 @@ export default class StatusWidgetPreferences extends ExtensionPreferences {
         });
     }
 
-    _showAddDialog(window, settings, group) {
+    _showAddDialog(window, settings, _group) {
         const dialog = new Gtk.Dialog({
             title: _('Add Indicator'),
             modal: true,

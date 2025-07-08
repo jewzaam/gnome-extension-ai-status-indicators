@@ -81,15 +81,18 @@ const IndicatorRow = GObject.registerClass(
 
             dialog.connect('response', (dialog, response) => {
                 if (response === Gtk.ResponseType.OK) {
+                    // Update the indicator object
                     this._indicator.name = nameEntry.get_text();
                     this._indicator.readyIcon = readyEntry.get_text();
                     this._indicator.workingIcon = workingEntry.get_text();
                     this._indicator.waitingIcon = waitingEntry.get_text();
 
+                    // Update the UI
                     this.set_title(this._indicator.name);
                     this.set_subtitle(`Ready: ${this._indicator.readyIcon} | Working: ${this._indicator.workingIcon} | Waiting: ${this._indicator.waitingIcon}`);
 
-                    this._onUpdate();
+                    // Save the updated indicator to settings
+                    this._onUpdate(this._indicator);
                 }
                 dialog.destroy();
             });
@@ -266,8 +269,8 @@ export default class StatusWidgetPreferences extends ExtensionPreferences {
         indicators.forEach(indicator => {
             const row = new IndicatorRow(
                 indicator,
-                () => this._saveIndicators(settings, indicators),
-                (id) => this._deleteIndicator(settings, indicators, id)
+                (indicator) => this._saveIndicators(settings, indicator),
+                (id) => this._deleteIndicator(settings, id)
             );
             group.add(row);
         });
@@ -353,12 +356,38 @@ export default class StatusWidgetPreferences extends ExtensionPreferences {
         settings.set_string('indicators', JSON.stringify(indicators));
     }
 
-    _deleteIndicator(settings, indicators, id) {
+    _deleteIndicator(settings, id) {
+        const indicatorsJson = settings.get_string('indicators');
+        let indicators = [];
+        try {
+            indicators = JSON.parse(indicatorsJson);
+        } catch (e) {
+            console.error('Failed to parse indicators:', e);
+            return;
+        }
+
         const filteredIndicators = indicators.filter(indicator => indicator.id !== id);
         settings.set_string('indicators', JSON.stringify(filteredIndicators));
     }
 
-    _saveIndicators(settings, indicators) {
-        settings.set_string('indicators', JSON.stringify(indicators));
+    _saveIndicators(settings, editedIndicator) {
+        // This method is called when an indicator is edited
+        // We need to update the specific indicator in the settings
+
+        const indicatorsJson = settings.get_string('indicators');
+        let indicators = [];
+        try {
+            indicators = JSON.parse(indicatorsJson);
+        } catch (e) {
+            console.error('Failed to parse indicators:', e);
+            return;
+        }
+
+        // Find and update the edited indicator
+        const index = indicators.findIndex(indicator => indicator.id === editedIndicator.id);
+        if (index !== -1) {
+            indicators[index] = editedIndicator;
+            settings.set_string('indicators', JSON.stringify(indicators));
+        }
     }
 }

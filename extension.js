@@ -44,8 +44,9 @@ const StatusIndicator = GObject.registerClass(
                 this.add_child(this._textLabel);
             }
 
-            // Set tooltip to show indicator name
-            this.set_tooltip_text(this._name);
+            // Set tooltip to show indicator name on hover
+            // Note: tooltip functionality changed in GNOME Shell 48
+            // this.set_tooltip_text(this._name);
         }
 
         setStatus(status) {
@@ -100,7 +101,8 @@ const StatusIndicator = GObject.registerClass(
             }
 
             // Update tooltip with new name
-            this.set_tooltip_text(this._name);
+            // Note: tooltip functionality changed in GNOME Shell 48
+            // this.set_tooltip_text(this._name);
         }
     });
 

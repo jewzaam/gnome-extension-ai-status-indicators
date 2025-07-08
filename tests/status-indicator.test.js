@@ -40,6 +40,9 @@ class StatusIndicator extends St.BoxLayout {
             });
             this.add_child(this._textLabel);
         }
+
+        // Set tooltip to show indicator name
+        this.set_tooltip_text(this._name);
     }
 
     setStatus(status) {
@@ -90,6 +93,9 @@ class StatusIndicator extends St.BoxLayout {
         if (this._textLabel) {
             this._textLabel.set_text(this._name);
         }
+
+        // Update tooltip with new name
+        this.set_tooltip_text(this._name);
     }
 }
 
@@ -126,6 +132,10 @@ describe('StatusIndicator', () => {
 
         test('should not create text label when showLabel is false', () => {
             expect(indicator._textLabel).toBeUndefined();
+        });
+
+        test('should set tooltip to indicator name', () => {
+            expect(indicator.tooltip_text).toBe('Test AI');
         });
     });
 
@@ -225,6 +235,11 @@ describe('StatusIndicator', () => {
             expect(() => indicator.setStatus('ready')).not.toThrow();
             expect(() => indicator.setStatus('working')).not.toThrow();
             expect(() => indicator.setStatus('waiting')).not.toThrow();
+        });
+
+        test('should update tooltip when name changes', () => {
+            indicator.updateConfig('Updated AI Name', '✅', '⚠️', '⛔', false);
+            expect(indicator.tooltip_text).toBe('Updated AI Name');
         });
     });
 

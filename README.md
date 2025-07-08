@@ -50,6 +50,7 @@ A minimal GNOME Shell extension that displays configurable status indicators for
 - **Zero or more indicators**: Add/remove status indicators dynamically
 - **Simple emoji icons**: Static, non-distracting indicators (default: ✅ ready, ⚠️ working, ⛔ waiting)
 - **Customizable**: Configure indicator names, icons, and positioning
+- **Tooltips**: Hover over indicators to see their names (project names, tool names, etc.)
 - **D-Bus control**: Programmatic control via D-Bus for external applications
 - **Lightweight**: Minimal resource usage and clean UI integration
 - **Configurable positioning**: Place indicators in left, center, or right panel areas

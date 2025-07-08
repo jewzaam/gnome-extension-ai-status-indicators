@@ -23,6 +23,7 @@ global.imports = {
                     this.vertical = params.vertical;
                     this.children = [];
                     this.visible = true;
+                    this.tooltip_text = '';
                 }
                 
                 add_child(child) {
@@ -34,6 +35,14 @@ global.imports = {
                     if (index > -1) {
                         this.children.splice(index, 1);
                     }
+                }
+
+                set_tooltip_text(text) {
+                    this.tooltip_text = text;
+                }
+
+                get_tooltip_text() {
+                    return this.tooltip_text;
                 }
             },
             Label: class MockLabel {

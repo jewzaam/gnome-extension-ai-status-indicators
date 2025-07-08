@@ -42,6 +42,9 @@ class StatusIndicator extends St.BoxLayout {
             });
             this.add_child(this._textLabel);
         }
+
+        // Set tooltip to show indicator name
+        this.set_tooltip_text(this._name);
     }
 
     setStatus(status) {
@@ -94,6 +97,9 @@ class StatusIndicator extends St.BoxLayout {
         if (this._textLabel) {
             this._textLabel.set_text(this._name);
         }
+
+        // Update tooltip with new name
+        this.set_tooltip_text(this._name);
     }
 });
 
@@ -275,18 +281,27 @@ export default class StatusWidgetExtension extends Extension {
         let targetBox;
         let index = -1;
 
+        // The original code uses index = -1 for 'left' and 'center', and index = 0 for 'right'.
+        // In St.BoxLayout, index = -1 means "append at the end", and index = 0 means "insert at the beginning".
+        // This is likely to ensure the widget appears at the far right in the right box (which is the default GNOME convention),
+        // and at the end in left/center boxes (so it doesn't push out other items).
+        // For clarity, let's add a comment and make the intent explicit:
+
         switch (position) {
             case 'left':
                 targetBox = Main.panel._leftBox;
+                // Insert at end so it appears rightmost in the left box
                 index = -1;
                 break;
             case 'center':
                 targetBox = Main.panel._centerBox;
+                // Insert at end so it appears rightmost in the center box
                 index = -1;
                 break;
             case 'right':
             default:
                 targetBox = Main.panel._rightBox;
+                // Insert at beginning so it appears leftmost in the right box (GNOME convention)
                 index = 0;
                 break;
         }

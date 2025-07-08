@@ -6,6 +6,11 @@
   "main": "extension.js",
   "scripts": {
     "test": "jest",
+    "test:gnome45": "GNOME_VERSION=45 jest",
+    "test:gnome46": "GNOME_VERSION=46 jest", 
+    "test:gnome47": "GNOME_VERSION=47 jest",
+    "test:gnome48": "GNOME_VERSION=48 jest",
+    "test:all-versions": "npm run test:gnome45 && npm run test:gnome46 && npm run test:gnome47 && npm run test:gnome48",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "lint": "eslint *.js tests/*.js"

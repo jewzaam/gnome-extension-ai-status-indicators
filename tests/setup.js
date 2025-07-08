@@ -99,7 +99,7 @@ global.imports = {
         },
         Gio: {
             DBusExportedObject: {
-                wrapJSObject: (xml, obj) => ({
+                wrapJSObject: (_xml, _obj) => ({
                     export: jest.fn(),
                     unexport: jest.fn()
                 })
@@ -239,7 +239,7 @@ global.Extension = class MockExtension {
                 return this._connections.get(signal).length - 1;
             },
 
-            disconnect(id) {
+            disconnect(_id) {
                 // Simple mock - doesn't actually disconnect
             }
         };

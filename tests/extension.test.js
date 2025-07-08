@@ -2,7 +2,6 @@
 // Integration tests for the extension
 const Extension = global.Extension;
 const Main = global.Main;
-const Gio = global.imports.gi.Gio;
 
 // Mock Extension class for testing
 class MockStatusWidgetExtension extends Extension {

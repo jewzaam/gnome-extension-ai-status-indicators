@@ -86,7 +86,7 @@ class StatusWidget extends PanelMenu.Button {
     }
 
     clearIndicators() {
-        for (const [id, indicator] of this._indicators) {
+        for (const [, indicator] of this._indicators) {
             this._container.remove_child(indicator);
         }
         this._indicators.clear();

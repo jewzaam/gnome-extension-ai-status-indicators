@@ -35,7 +35,7 @@ class MockStatusIndicator {
 // Create a simplified version of StatusWidget for testing
 class StatusWidget extends PanelMenu.Button {
     constructor() {
-        super(0.0, _("AI Status Indicators"));
+        super(0.0, _('AI Status Indicators'));
 
         this._container = new St.BoxLayout({
             style_class: 'status-widget-container',
@@ -44,6 +44,7 @@ class StatusWidget extends PanelMenu.Button {
 
         this.add_child(this._container);
         this._indicators = new Map();
+        this._updateVisibility();
     }
 
     addIndicator(id, name, readyIcon = '✅', workingIcon = '⚠️', waitingIcon = '⛔', showLabel = false) {
@@ -122,7 +123,7 @@ describe('StatusWidget', () => {
     describe('addIndicator', () => {
         test('should add indicator with default values', () => {
             widget.addIndicator('test-id', 'Test AI');
-            
+
             expect(widget._indicators.size).toBe(1);
             expect(widget._indicators.has('test-id')).toBe(true);
             expect(widget.visible).toBe(true);
@@ -130,7 +131,7 @@ describe('StatusWidget', () => {
 
         test('should add indicator with custom icons', () => {
             widget.addIndicator('test-id', 'Test AI', '🟢', '🟡', '🔴', false);
-            
+
             const indicator = widget._indicators.get('test-id');
             expect(indicator._readyIcon).toBe('🟢');
             expect(indicator._workingIcon).toBe('🟡');
@@ -140,21 +141,21 @@ describe('StatusWidget', () => {
         test('should not add duplicate indicator', () => {
             widget.addIndicator('test-id', 'Test AI');
             widget.addIndicator('test-id', 'Test AI 2');
-            
+
             expect(widget._indicators.size).toBe(1);
         });
 
         test('should add indicator to container', () => {
             widget.addIndicator('test-id', 'Test AI');
-            
+
             expect(widget._container.children.length).toBe(1);
         });
 
         test('should make widget visible when first indicator added', () => {
             expect(widget.visible).toBe(false);
-            
+
             widget.addIndicator('test-id', 'Test AI');
-            
+
             expect(widget.visible).toBe(true);
         });
     });
@@ -166,32 +167,32 @@ describe('StatusWidget', () => {
 
         test('should remove existing indicator', () => {
             expect(widget._indicators.size).toBe(1);
-            
+
             widget.removeIndicator('test-id');
-            
+
             expect(widget._indicators.size).toBe(0);
             expect(widget._indicators.has('test-id')).toBe(false);
         });
 
         test('should remove indicator from container', () => {
             expect(widget._container.children.length).toBe(1);
-            
+
             widget.removeIndicator('test-id');
-            
+
             expect(widget._container.children.length).toBe(0);
         });
 
         test('should make widget invisible when last indicator removed', () => {
             expect(widget.visible).toBe(true);
-            
+
             widget.removeIndicator('test-id');
-            
+
             expect(widget.visible).toBe(false);
         });
 
         test('should handle removing non-existent indicator', () => {
             widget.removeIndicator('non-existent');
-            
+
             expect(widget._indicators.size).toBe(1);
         });
     });
@@ -203,7 +204,7 @@ describe('StatusWidget', () => {
 
         test('should update existing indicator', () => {
             widget.updateIndicator('test-id', 'Updated AI', '🟢', '🟡', '🔴', true);
-            
+
             const indicator = widget._indicators.get('test-id');
             expect(indicator._name).toBe('Updated AI');
             expect(indicator._readyIcon).toBe('🟢');
@@ -214,7 +215,7 @@ describe('StatusWidget', () => {
 
         test('should handle updating non-existent indicator', () => {
             widget.updateIndicator('non-existent', 'Test', '✅', '⚠️', '⛔', false);
-            
+
             expect(widget._indicators.size).toBe(1);
         });
     });
@@ -226,21 +227,21 @@ describe('StatusWidget', () => {
 
         test('should set status with string value', () => {
             widget.setIndicatorStatus('test-id', 'working');
-            
+
             const indicator = widget._indicators.get('test-id');
             expect(indicator._status).toBe('working');
         });
 
         test('should set status with boolean value (backward compatibility)', () => {
             widget.setIndicatorStatus('test-id', true);
-            
+
             const indicator = widget._indicators.get('test-id');
             expect(indicator._status).toBe('working');
         });
 
         test('should handle setting status on non-existent indicator', () => {
             widget.setIndicatorStatus('non-existent', 'working');
-            
+
             // Should not throw error
             expect(widget._indicators.size).toBe(1);
         });
@@ -255,25 +256,25 @@ describe('StatusWidget', () => {
 
         test('should remove all indicators', () => {
             expect(widget._indicators.size).toBe(3);
-            
+
             widget.clearIndicators();
-            
+
             expect(widget._indicators.size).toBe(0);
         });
 
         test('should clear container', () => {
             expect(widget._container.children.length).toBe(3);
-            
+
             widget.clearIndicators();
-            
+
             expect(widget._container.children.length).toBe(0);
         });
 
         test('should make widget invisible', () => {
             expect(widget.visible).toBe(true);
-            
+
             widget.clearIndicators();
-            
+
             expect(widget.visible).toBe(false);
         });
     });
@@ -283,7 +284,7 @@ describe('StatusWidget', () => {
             widget.addIndicator('cursor', 'Cursor AI');
             widget.addIndicator('copilot', 'Copilot');
             widget.addIndicator('claude', 'Claude');
-            
+
             expect(widget._indicators.size).toBe(3);
             expect(widget._container.children.length).toBe(3);
             expect(widget.visible).toBe(true);
@@ -292,10 +293,10 @@ describe('StatusWidget', () => {
         test('should independently control multiple indicators', () => {
             widget.addIndicator('cursor', 'Cursor AI');
             widget.addIndicator('copilot', 'Copilot');
-            
+
             widget.setIndicatorStatus('cursor', 'working');
             widget.setIndicatorStatus('copilot', 'waiting');
-            
+
             expect(widget._indicators.get('cursor')._status).toBe('working');
             expect(widget._indicators.get('copilot')._status).toBe('waiting');
         });
@@ -314,18 +315,18 @@ describe('StatusWidget', () => {
         test('should remain visible when removing one of multiple indicators', () => {
             widget.addIndicator('test-1', 'Test AI 1');
             widget.addIndicator('test-2', 'Test AI 2');
-            
+
             widget.removeIndicator('test-1');
-            
+
             expect(widget.visible).toBe(true);
         });
 
         test('should become invisible when removing last indicator', () => {
             widget.addIndicator('test-id', 'Test AI');
-            
+
             widget.removeIndicator('test-id');
-            
+
             expect(widget.visible).toBe(false);
         });
     });
-}); 
+});

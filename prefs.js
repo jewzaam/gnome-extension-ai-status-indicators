@@ -7,101 +7,101 @@ import GObject from 'gi://GObject';
 import {ExtensionPreferences, gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
 const IndicatorRow = GObject.registerClass(
-class IndicatorRow extends Adw.ActionRow {
-    _init(indicator, onUpdate, onDelete) {
-        super._init({
-            title: indicator.name,
-            subtitle: `Ready: ${indicator.readyIcon} | Working: ${indicator.workingIcon} | Waiting: ${indicator.waitingIcon}`
-        });
+    class IndicatorRow extends Adw.ActionRow {
+        _init(indicator, onUpdate, onDelete) {
+            super._init({
+                title: indicator.name,
+                subtitle: `Ready: ${indicator.readyIcon} | Working: ${indicator.workingIcon} | Waiting: ${indicator.waitingIcon}`
+            });
 
-        this._indicator = indicator;
-        this._onUpdate = onUpdate;
-        this._onDelete = onDelete;
+            this._indicator = indicator;
+            this._onUpdate = onUpdate;
+            this._onDelete = onDelete;
 
-        // Delete button
-        const deleteButton = new Gtk.Button({
-            icon_name: 'edit-delete-symbolic',
-            css_classes: ['flat', 'circular'],
-            valign: Gtk.Align.CENTER
-        });
-        deleteButton.connect('clicked', () => this._onDelete(this._indicator.id));
-        this.add_suffix(deleteButton);
+            // Delete button
+            const deleteButton = new Gtk.Button({
+                icon_name: 'edit-delete-symbolic',
+                css_classes: ['flat', 'circular'],
+                valign: Gtk.Align.CENTER
+            });
+            deleteButton.connect('clicked', () => this._onDelete(this._indicator.id));
+            this.add_suffix(deleteButton);
 
-        // Edit button
-        const editButton = new Gtk.Button({
-            icon_name: 'edit-symbolic',
-            css_classes: ['flat', 'circular'],
-            valign: Gtk.Align.CENTER
-        });
-        editButton.connect('clicked', () => this._showEditDialog());
-        this.add_suffix(editButton);
-    }
+            // Edit button
+            const editButton = new Gtk.Button({
+                icon_name: 'edit-symbolic',
+                css_classes: ['flat', 'circular'],
+                valign: Gtk.Align.CENTER
+            });
+            editButton.connect('clicked', () => this._showEditDialog());
+            this.add_suffix(editButton);
+        }
 
-    _showEditDialog() {
-        const dialog = new Gtk.Dialog({
-            title: _('Edit Indicator'),
-            modal: true,
-            transient_for: this.get_root()
-        });
+        _showEditDialog() {
+            const dialog = new Gtk.Dialog({
+                title: _('Edit Indicator'),
+                modal: true,
+                transient_for: this.get_root()
+            });
 
-        const contentArea = dialog.get_content_area();
-        contentArea.set_spacing(12);
-        contentArea.set_margin_top(12);
-        contentArea.set_margin_bottom(12);
-        contentArea.set_margin_start(12);
-        contentArea.set_margin_end(12);
+            const contentArea = dialog.get_content_area();
+            contentArea.set_spacing(12);
+            contentArea.set_margin_top(12);
+            contentArea.set_margin_bottom(12);
+            contentArea.set_margin_start(12);
+            contentArea.set_margin_end(12);
 
-        // Name entry
-        const nameLabel = new Gtk.Label({label: _('Name:'), xalign: 0});
-        const nameEntry = new Gtk.Entry({text: this._indicator.name});
-        contentArea.append(nameLabel);
-        contentArea.append(nameEntry);
+            // Name entry
+            const nameLabel = new Gtk.Label({label: _('Name:'), xalign: 0});
+            const nameEntry = new Gtk.Entry({text: this._indicator.name});
+            contentArea.append(nameLabel);
+            contentArea.append(nameEntry);
 
-        // Ready icon entry
-        const readyLabel = new Gtk.Label({label: _('Ready Icon:'), xalign: 0});
-        const readyEntry = new Gtk.Entry({text: this._indicator.readyIcon});
-        contentArea.append(readyLabel);
-        contentArea.append(readyEntry);
+            // Ready icon entry
+            const readyLabel = new Gtk.Label({label: _('Ready Icon:'), xalign: 0});
+            const readyEntry = new Gtk.Entry({text: this._indicator.readyIcon});
+            contentArea.append(readyLabel);
+            contentArea.append(readyEntry);
 
-        // Working icon entry
-        const workingLabel = new Gtk.Label({label: _('Working Icon:'), xalign: 0});
-        const workingEntry = new Gtk.Entry({text: this._indicator.workingIcon});
-        contentArea.append(workingLabel);
-        contentArea.append(workingEntry);
+            // Working icon entry
+            const workingLabel = new Gtk.Label({label: _('Working Icon:'), xalign: 0});
+            const workingEntry = new Gtk.Entry({text: this._indicator.workingIcon});
+            contentArea.append(workingLabel);
+            contentArea.append(workingEntry);
 
-        // Waiting icon entry
-        const waitingLabel = new Gtk.Label({label: _('Waiting Icon:'), xalign: 0});
-        const waitingEntry = new Gtk.Entry({text: this._indicator.waitingIcon});
-        contentArea.append(waitingLabel);
-        contentArea.append(waitingEntry);
+            // Waiting icon entry
+            const waitingLabel = new Gtk.Label({label: _('Waiting Icon:'), xalign: 0});
+            const waitingEntry = new Gtk.Entry({text: this._indicator.waitingIcon});
+            contentArea.append(waitingLabel);
+            contentArea.append(waitingEntry);
 
-        // Buttons
-        dialog.add_button(_('Cancel'), Gtk.ResponseType.CANCEL);
-        dialog.add_button(_('Save'), Gtk.ResponseType.OK);
+            // Buttons
+            dialog.add_button(_('Cancel'), Gtk.ResponseType.CANCEL);
+            dialog.add_button(_('Save'), Gtk.ResponseType.OK);
 
-        dialog.connect('response', (dialog, response) => {
-            if (response === Gtk.ResponseType.OK) {
-                this._indicator.name = nameEntry.get_text();
-                this._indicator.readyIcon = readyEntry.get_text();
-                this._indicator.workingIcon = workingEntry.get_text();
-                this._indicator.waitingIcon = waitingEntry.get_text();
-                
-                this.set_title(this._indicator.name);
-                this.set_subtitle(`Ready: ${this._indicator.readyIcon} | Working: ${this._indicator.workingIcon} | Waiting: ${this._indicator.waitingIcon}`);
-                
-                this._onUpdate();
-            }
-            dialog.destroy();
-        });
+            dialog.connect('response', (dialog, response) => {
+                if (response === Gtk.ResponseType.OK) {
+                    this._indicator.name = nameEntry.get_text();
+                    this._indicator.readyIcon = readyEntry.get_text();
+                    this._indicator.workingIcon = workingEntry.get_text();
+                    this._indicator.waitingIcon = waitingEntry.get_text();
 
-        dialog.show();
-    }
-});
+                    this.set_title(this._indicator.name);
+                    this.set_subtitle(`Ready: ${this._indicator.readyIcon} | Working: ${this._indicator.workingIcon} | Waiting: ${this._indicator.waitingIcon}`);
+
+                    this._onUpdate();
+                }
+                dialog.destroy();
+            });
+
+            dialog.show();
+        }
+    });
 
 export default class StatusWidgetPreferences extends ExtensionPreferences {
     fillPreferencesWindow(window) {
         const settings = this.getSettings();
-        
+
         // Main page
         const page = new Adw.PreferencesPage({
             title: _('AI Status Indicators'),
@@ -126,16 +126,16 @@ export default class StatusWidgetPreferences extends ExtensionPreferences {
 
         const position = settings.get_string('position');
         switch (position) {
-            case 'left':
-                positionRow.set_selected(0);
-                break;
-            case 'center':
-                positionRow.set_selected(1);
-                break;
-            case 'right':
-            default:
-                positionRow.set_selected(2);
-                break;
+        case 'left':
+            positionRow.set_selected(0);
+            break;
+        case 'center':
+            positionRow.set_selected(1);
+            break;
+        case 'right':
+        default:
+            positionRow.set_selected(2);
+            break;
         }
 
         positionRow.connect('notify::selected', () => {
@@ -361,4 +361,4 @@ export default class StatusWidgetPreferences extends ExtensionPreferences {
     _saveIndicators(settings, indicators) {
         settings.set_string('indicators', JSON.stringify(indicators));
     }
-} 
+}

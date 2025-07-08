@@ -21,9 +21,10 @@ class MockStatusWidgetExtension extends Extension {
             clearIndicators: jest.fn(),
             addIndicator: jest.fn(),
             setIndicatorStatus: jest.fn(),
+            removeIndicator: jest.fn(),
             visible: false
         };
-        
+
         this._settingsConnections = [];
         this._createDBusInterface();
         this._updatePosition();
@@ -34,33 +35,47 @@ class MockStatusWidgetExtension extends Extension {
             this._settings.disconnect(connection);
         });
         this._settingsConnections = [];
-        
+
         if (this._widget) {
             this._widget.destroy();
             this._widget = null;
         }
-        
+
         if (this._dbusImpl) {
             this._dbusImpl.unexport();
             this._dbusImpl = null;
         }
-        
+
         this._settings = null;
     }
 
     _createDBusInterface() {
-        this._dbusImpl = Gio.DBusExportedObject.wrapJSObject('', this);
+        this._dbusImpl = {
+            export: jest.fn(),
+            unexport: jest.fn()
+        };
+        this._dbusImpl.export();
     }
 
     _updatePosition() {
         const position = this._settings.get_string('position');
-        // Mock position update logic
+
+        // Remove widget from all panels first
+        const panels = [Main.panel._leftBox, Main.panel._centerBox, Main.panel._rightBox];
+        panels.forEach(panel => {
+            const index = panel.children.indexOf(this._widget);
+            if (index !== -1) {
+                panel.children.splice(index, 1);
+            }
+        });
+
+        // Add widget to correct panel
         if (position === 'left') {
-            Main.panel._leftBox.insert_child_at_index(this._widget, -1);
+            Main.panel._leftBox.children.push(this._widget);
         } else if (position === 'center') {
-            Main.panel._centerBox.insert_child_at_index(this._widget, -1);
+            Main.panel._centerBox.children.push(this._widget);
         } else {
-            Main.panel._rightBox.insert_child_at_index(this._widget, 0);
+            Main.panel._rightBox.children.push(this._widget);
         }
     }
 
@@ -71,7 +86,7 @@ class MockStatusWidgetExtension extends Extension {
 
         const indicatorsJson = this._settings.get_string('indicators');
         const showLabels = this._settings.get_boolean('show-labels');
-        
+
         let indicators = [];
         try {
             indicators = JSON.parse(indicatorsJson);
@@ -95,20 +110,20 @@ class MockStatusWidgetExtension extends Extension {
 
     // D-Bus methods
     SetIndicatorStatus(id, status) {
-        if (this._widget) {
+        if (this._widget && id !== undefined && status !== undefined) {
             this._widget.setIndicatorStatus(id, status);
         }
     }
 
     AddIndicator(id, name, readyIcon = '✅', workingIcon = '⚠️', waitingIcon = '⛔') {
-        if (this._widget) {
+        if (this._widget && id !== undefined && name !== undefined) {
             const showLabels = this._settings.get_boolean('show-labels');
             this._widget.addIndicator(id, name, readyIcon, workingIcon, waitingIcon, showLabels);
         }
     }
 
     RemoveIndicator(id) {
-        if (this._widget) {
+        if (this._widget && id !== undefined) {
             this._widget.removeIndicator(id);
         }
     }
@@ -120,24 +135,24 @@ describe('StatusWidgetExtension', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        
+
         // Clear panel boxes
         Main.panel._leftBox.children = [];
         Main.panel._centerBox.children = [];
         Main.panel._rightBox.children = [];
-        
+
         mockMetadata = {
             uuid: 'ai-status-indicators@test',
             name: 'AI Status Indicators Test'
         };
-        
+
         extension = new MockStatusWidgetExtension(mockMetadata);
     });
 
     describe('enable/disable lifecycle', () => {
         test('should enable extension', () => {
             extension.enable();
-            
+
             expect(extension._widget).toBeDefined();
             expect(extension._settings).toBeDefined();
             expect(extension._dbusImpl).toBeDefined();
@@ -146,7 +161,7 @@ describe('StatusWidgetExtension', () => {
         test('should disable extension', () => {
             extension.enable();
             extension.disable();
-            
+
             expect(extension._widget).toBeNull();
             expect(extension._settings).toBeNull();
             expect(extension._dbusImpl).toBeNull();
@@ -155,9 +170,9 @@ describe('StatusWidgetExtension', () => {
         test('should clean up widget on disable', () => {
             extension.enable();
             const destroySpy = extension._widget.destroy;
-            
+
             extension.disable();
-            
+
             expect(destroySpy).toHaveBeenCalled();
         });
     });
@@ -179,10 +194,10 @@ describe('StatusWidgetExtension', () => {
                 workingIcon: '⚠️',
                 waitingIcon: '⛔'
             }];
-            
+
             extension._settings.set_string('indicators', JSON.stringify(indicators));
             extension._loadIndicators();
-            
+
             expect(extension._widget.clearIndicators).toHaveBeenCalled();
             expect(extension._widget.addIndicator).toHaveBeenCalledWith(
                 'test-id', 'Test AI', '✅', '⚠️', '⛔', false
@@ -191,7 +206,7 @@ describe('StatusWidgetExtension', () => {
 
         test('should handle invalid indicators JSON', () => {
             extension._settings.set_string('indicators', 'invalid json');
-            
+
             // Should not throw
             expect(() => extension._loadIndicators()).not.toThrow();
         });
@@ -204,11 +219,11 @@ describe('StatusWidgetExtension', () => {
                 workingIcon: '⚠️',
                 waitingIcon: '⛔'
             }];
-            
+
             extension._settings.set_boolean('show-labels', true);
             extension._settings.set_string('indicators', JSON.stringify(indicators));
             extension._loadIndicators();
-            
+
             expect(extension._widget.addIndicator).toHaveBeenCalledWith(
                 'test-id', 'Test AI', '✅', '⚠️', '⛔', true
             );
@@ -253,7 +268,7 @@ describe('StatusWidgetExtension', () => {
         test('should move widget to left panel', () => {
             extension._settings.set_string('position', 'left');
             extension._updatePosition();
-            
+
             expect(Main.panel._leftBox.children).toContain(extension._widget);
             expect(Main.panel._rightBox.children).not.toContain(extension._widget);
         });
@@ -261,7 +276,7 @@ describe('StatusWidgetExtension', () => {
         test('should move widget to center panel', () => {
             extension._settings.set_string('position', 'center');
             extension._updatePosition();
-            
+
             expect(Main.panel._centerBox.children).toContain(extension._widget);
             expect(Main.panel._rightBox.children).not.toContain(extension._widget);
         });
@@ -286,9 +301,9 @@ describe('StatusWidgetExtension', () => {
 
         test('should unexport D-Bus interface on disable', () => {
             const unexportSpy = extension._dbusImpl.unexport;
-            
+
             extension.disable();
-            
+
             expect(unexportSpy).toHaveBeenCalled();
         });
     });
@@ -304,13 +319,13 @@ describe('StatusWidgetExtension', () => {
 
         test('should set indicator status', () => {
             extension.SetIndicatorStatus('test-id', 'working');
-            
+
             expect(extension._widget.setIndicatorStatus).toHaveBeenCalledWith('test-id', 'working');
         });
 
         test('should add indicator', () => {
             extension.AddIndicator('test-id', 'Test AI', '✅', '⚠️', '⛔');
-            
+
             expect(extension._widget.addIndicator).toHaveBeenCalledWith(
                 'test-id', 'Test AI', '✅', '⚠️', '⛔', false
             );
@@ -318,15 +333,15 @@ describe('StatusWidgetExtension', () => {
 
         test('should remove indicator', () => {
             extension._widget.removeIndicator = jest.fn();
-            
+
             extension.RemoveIndicator('test-id');
-            
+
             expect(extension._widget.removeIndicator).toHaveBeenCalledWith('test-id');
         });
 
         test('should handle D-Bus calls when widget is null', () => {
             extension._widget = null;
-            
+
             // Should not throw
             expect(() => extension.SetIndicatorStatus('test-id', 'working')).not.toThrow();
             expect(() => extension.AddIndicator('test-id', 'Test AI')).not.toThrow();
@@ -370,9 +385,9 @@ describe('StatusWidgetExtension', () => {
             Extension.prototype.getSettings = jest.fn().mockImplementation(() => {
                 throw new Error('Settings error');
             });
-            
+
             expect(() => extension.enable()).toThrow();
-            
+
             // Restore
             Extension.prototype.getSettings = originalGetSettings;
         });

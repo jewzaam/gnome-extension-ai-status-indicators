@@ -9,48 +9,48 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 
 const StatusIndicator = GObject.registerClass(
-class StatusIndicator extends St.BoxLayout {
-    _init(name, readyIcon, workingIcon, waitingIcon, showLabel) {
-        super._init({
-            style_class: 'status-indicator',
-            reactive: true,
-            can_focus: true,
-            track_hover: true,
-            vertical: false
-        });
-
-        this._name = name;
-        this._readyIcon = readyIcon;
-        this._workingIcon = workingIcon;
-        this._waitingIcon = waitingIcon;
-        this._showLabel = showLabel;
-        this._status = 'ready'; // 'ready', 'working', 'waiting'
-
-        this._iconLabel = new St.Label({
-            text: this._readyIcon,
-            y_align: St.Align.MIDDLE,
-            style_class: 'status-indicator-icon'
-        });
-
-        this.add_child(this._iconLabel);
-
-        if (this._showLabel) {
-            this._textLabel = new St.Label({
-                text: this._name,
-                y_align: St.Align.MIDDLE,
-                style_class: 'status-indicator-label'
+    class StatusIndicator extends St.BoxLayout {
+        _init(name, readyIcon, workingIcon, waitingIcon, showLabel) {
+            super._init({
+                style_class: 'status-indicator',
+                reactive: true,
+                can_focus: true,
+                track_hover: true,
+                vertical: false
             });
-            this.add_child(this._textLabel);
+
+            this._name = name;
+            this._readyIcon = readyIcon;
+            this._workingIcon = workingIcon;
+            this._waitingIcon = waitingIcon;
+            this._showLabel = showLabel;
+            this._status = 'ready'; // 'ready', 'working', 'waiting'
+
+            this._iconLabel = new St.Label({
+                text: this._readyIcon,
+                y_align: St.Align.MIDDLE,
+                style_class: 'status-indicator-icon'
+            });
+
+            this.add_child(this._iconLabel);
+
+            if (this._showLabel) {
+                this._textLabel = new St.Label({
+                    text: this._name,
+                    y_align: St.Align.MIDDLE,
+                    style_class: 'status-indicator-label'
+                });
+                this.add_child(this._textLabel);
+            }
+
+            // Set tooltip to show indicator name
+            this.set_tooltip_text(this._name);
         }
 
-        // Set tooltip to show indicator name
-        this.set_tooltip_text(this._name);
-    }
-
-    setStatus(status) {
-        this._status = status;
-        let icon;
-        switch (status) {
+        setStatus(status) {
+            this._status = status;
+            let icon;
+            switch (status) {
             case 'working':
                 icon = this._workingIcon;
                 break;
@@ -61,114 +61,114 @@ class StatusIndicator extends St.BoxLayout {
             default:
                 icon = this._readyIcon;
                 break;
-        }
-        this._iconLabel.set_text(icon);
-    }
-
-    // Keep backward compatibility
-    setWorking(isWorking) {
-        this.setStatus(isWorking ? 'working' : 'ready');
-    }
-
-    updateConfig(name, readyIcon, workingIcon, waitingIcon, showLabel) {
-        this._name = name;
-        this._readyIcon = readyIcon;
-        this._workingIcon = workingIcon;
-        this._waitingIcon = waitingIcon;
-        
-        // Update current display based on current status
-        this.setStatus(this._status);
-        
-        if (this._showLabel !== showLabel) {
-            this._showLabel = showLabel;
-            if (showLabel && !this._textLabel) {
-                this._textLabel = new St.Label({
-                    text: this._name,
-                    y_align: St.Align.MIDDLE,
-                    style_class: 'status-indicator-label'
-                });
-                this.add_child(this._textLabel);
-            } else if (!showLabel && this._textLabel) {
-                this.remove_child(this._textLabel);
-                this._textLabel = null;
             }
-        }
-        
-        if (this._textLabel) {
-            this._textLabel.set_text(this._name);
+            this._iconLabel.set_text(icon);
         }
 
-        // Update tooltip with new name
-        this.set_tooltip_text(this._name);
-    }
-});
+        // Keep backward compatibility
+        setWorking(isWorking) {
+            this.setStatus(isWorking ? 'working' : 'ready');
+        }
+
+        updateConfig(name, readyIcon, workingIcon, waitingIcon, showLabel) {
+            this._name = name;
+            this._readyIcon = readyIcon;
+            this._workingIcon = workingIcon;
+            this._waitingIcon = waitingIcon;
+
+            // Update current display based on current status
+            this.setStatus(this._status);
+
+            if (this._showLabel !== showLabel) {
+                this._showLabel = showLabel;
+                if (showLabel && !this._textLabel) {
+                    this._textLabel = new St.Label({
+                        text: this._name,
+                        y_align: St.Align.MIDDLE,
+                        style_class: 'status-indicator-label'
+                    });
+                    this.add_child(this._textLabel);
+                } else if (!showLabel && this._textLabel) {
+                    this.remove_child(this._textLabel);
+                    this._textLabel = null;
+                }
+            }
+
+            if (this._textLabel) {
+                this._textLabel.set_text(this._name);
+            }
+
+            // Update tooltip with new name
+            this.set_tooltip_text(this._name);
+        }
+    });
 
 const StatusWidget = GObject.registerClass(
-class StatusWidget extends PanelMenu.Button {
-    _init() {
-        super._init(0.0, _("AI Status Indicators"));
+    class StatusWidget extends PanelMenu.Button {
+        _init() {
+            super._init(0.0, _('AI Status Indicators'));
 
-        this._container = new St.BoxLayout({
-            style_class: 'status-widget-container',
-            vertical: false
-        });
+            this._container = new St.BoxLayout({
+                style_class: 'status-widget-container',
+                vertical: false
+            });
 
-        this.add_child(this._container);
-        this._indicators = new Map();
-    }
-
-    addIndicator(id, name, readyIcon = '✅', workingIcon = '⚠️', waitingIcon = '⛔', showLabel = false) {
-        if (this._indicators.has(id)) {
-            return;
+            this.add_child(this._container);
+            this._indicators = new Map();
         }
 
-        const indicator = new StatusIndicator(name, readyIcon, workingIcon, waitingIcon, showLabel);
-        this._indicators.set(id, indicator);
-        this._container.add_child(indicator);
-        this._updateVisibility();
-    }
+        addIndicator(id, name, readyIcon = '✅', workingIcon = '⚠️', waitingIcon = '⛔', showLabel = false) {
+            if (this._indicators.has(id)) {
+                return;
+            }
 
-    removeIndicator(id) {
-        const indicator = this._indicators.get(id);
-        if (indicator) {
-            this._container.remove_child(indicator);
-            this._indicators.delete(id);
+            const indicator = new StatusIndicator(name, readyIcon, workingIcon, waitingIcon, showLabel);
+            this._indicators.set(id, indicator);
+            this._container.add_child(indicator);
             this._updateVisibility();
         }
-    }
 
-    updateIndicator(id, name, readyIcon, workingIcon, waitingIcon, showLabel) {
-        const indicator = this._indicators.get(id);
-        if (indicator) {
-            indicator.updateConfig(name, readyIcon, workingIcon, waitingIcon, showLabel);
-        }
-    }
-
-    setIndicatorStatus(id, status) {
-        const indicator = this._indicators.get(id);
-        if (indicator) {
-            if (typeof status === 'boolean') {
-                // Backward compatibility: boolean means working/ready
-                indicator.setWorking(status);
-            } else {
-                // New string-based status
-                indicator.setStatus(status);
+        removeIndicator(id) {
+            const indicator = this._indicators.get(id);
+            if (indicator) {
+                this._container.remove_child(indicator);
+                this._indicators.delete(id);
+                this._updateVisibility();
             }
         }
-    }
 
-    clearIndicators() {
-        for (const [id, indicator] of this._indicators) {
-            this._container.remove_child(indicator);
+        updateIndicator(id, name, readyIcon, workingIcon, waitingIcon, showLabel) {
+            const indicator = this._indicators.get(id);
+            if (indicator) {
+                indicator.updateConfig(name, readyIcon, workingIcon, waitingIcon, showLabel);
+            }
         }
-        this._indicators.clear();
-        this._updateVisibility();
-    }
 
-    _updateVisibility() {
-        this.visible = this._indicators.size > 0;
-    }
-});
+        setIndicatorStatus(id, status) {
+            const indicator = this._indicators.get(id);
+            if (indicator) {
+                if (typeof status === 'boolean') {
+                // Backward compatibility: boolean means working/ready
+                    indicator.setWorking(status);
+                } else {
+                // New string-based status
+                    indicator.setStatus(status);
+                }
+            }
+        }
+
+        clearIndicators() {
+            for (const [id, indicator] of this._indicators) {
+                this._container.remove_child(indicator);
+            }
+            this._indicators.clear();
+            this._updateVisibility();
+        }
+
+        _updateVisibility() {
+            this.visible = this._indicators.size > 0;
+        }
+    });
 
 export default class StatusWidgetExtension extends Extension {
     constructor(metadata) {
@@ -183,20 +183,20 @@ export default class StatusWidgetExtension extends Extension {
     enable() {
         this._settings = this.getSettings();
         this._widget = new StatusWidget();
-        
+
         // Load initial indicators
         this._loadIndicators();
-        
+
         // Connect to settings changes
         this._settingsConnections = [
             this._settings.connect('changed::indicators', () => this._loadIndicators()),
             this._settings.connect('changed::show-labels', () => this._loadIndicators()),
             this._settings.connect('changed::position', () => this._updatePosition())
         ];
-        
+
         // Add to panel
         this._updatePosition();
-        
+
         // Create D-Bus interface for external control
         this._createDBusInterface();
     }
@@ -207,23 +207,23 @@ export default class StatusWidgetExtension extends Extension {
             this._settings.disconnect(connection);
         });
         this._settingsConnections = [];
-        
+
         // Remove from panel
         if (this._widget) {
             this._widget.destroy();
             this._widget = null;
         }
-        
+
         // Clean up D-Bus
         if (this._dbusImpl) {
             this._dbusImpl.unexport();
             this._dbusImpl = null;
         }
-        
+
         // Clear security tracking
         this._applicationLimits.clear();
         this._lastUpdateTime.clear();
-        
+
         this._settings = null;
     }
 
@@ -234,7 +234,7 @@ export default class StatusWidgetExtension extends Extension {
 
         const indicatorsJson = this._settings.get_string('indicators');
         const showLabels = this._settings.get_boolean('show-labels');
-        
+
         let indicators = [];
         try {
             indicators = JSON.parse(indicatorsJson);
@@ -288,22 +288,22 @@ export default class StatusWidgetExtension extends Extension {
         // For clarity, let's add a comment and make the intent explicit:
 
         switch (position) {
-            case 'left':
-                targetBox = Main.panel._leftBox;
-                // Insert at end so it appears rightmost in the left box
-                index = -1;
-                break;
-            case 'center':
-                targetBox = Main.panel._centerBox;
-                // Insert at end so it appears rightmost in the center box
-                index = -1;
-                break;
-            case 'right':
-            default:
-                targetBox = Main.panel._rightBox;
-                // Insert at beginning so it appears leftmost in the right box (GNOME convention)
-                index = 0;
-                break;
+        case 'left':
+            targetBox = Main.panel._leftBox;
+            // Insert at end so it appears rightmost in the left box
+            index = -1;
+            break;
+        case 'center':
+            targetBox = Main.panel._centerBox;
+            // Insert at end so it appears rightmost in the center box
+            index = -1;
+            break;
+        case 'right':
+        default:
+            targetBox = Main.panel._rightBox;
+            // Insert at beginning so it appears leftmost in the right box (GNOME convention)
+            index = 0;
+            break;
         }
 
         targetBox.insert_child_at_index(this._widget, index);
@@ -338,13 +338,13 @@ export default class StatusWidgetExtension extends Extension {
         if (!text || typeof text !== 'string') {
             return '';
         }
-        
+
         // Remove potentially dangerous characters and limit length
         const sanitized = text
             .replace(/[<>&"']/g, '') // Remove HTML/XML characters
             .replace(/[\x00-\x1F\x7F]/g, '') // Remove control characters
             .slice(0, maxLength);
-            
+
         return sanitized;
     }
 
@@ -360,14 +360,14 @@ export default class StatusWidgetExtension extends Extension {
         const now = Date.now();
         const lastUpdate = this._lastUpdateTime.get(appId) || 0;
         const rateLimitMs = this._settings.get_int('rate-limit-ms');
-        
+
         if (now - lastUpdate < rateLimitMs) {
             if (this._settings.get_boolean('enable-logging')) {
                 console.warn(`Rate limit exceeded for application: ${appId}`);
             }
             return false;
         }
-        
+
         this._lastUpdateTime.set(appId, now);
         return true;
     }
@@ -375,32 +375,32 @@ export default class StatusWidgetExtension extends Extension {
     _checkIndicatorLimit(appId) {
         const currentCount = this._applicationLimits.get(appId) || 0;
         const maxIndicators = this._settings.get_int('max-indicators-per-app');
-        
+
         if (currentCount >= maxIndicators) {
             if (this._settings.get_boolean('enable-logging')) {
                 console.warn(`Indicator limit exceeded for application: ${appId} (${currentCount}/${maxIndicators})`);
             }
             return false;
         }
-        
+
         return true;
     }
 
     // D-Bus methods with security validation
     SetIndicatorStatus(id, status) {
         if (!this._widget) return;
-        
+
         const appId = this._getCallerInfo();
-        
+
         // Rate limiting
         if (!this._checkRateLimit(appId)) {
             return;
         }
-        
+
         // Input validation
         const validId = this._validateInput(id, 30);
         const validStatus = this._validateInput(status, 20);
-        
+
         // Only allow valid status values
         if (!['ready', 'working', 'waiting'].includes(validStatus)) {
             if (this._settings.get_boolean('enable-logging')) {
@@ -408,32 +408,32 @@ export default class StatusWidgetExtension extends Extension {
             }
             return;
         }
-        
+
         this._widget.setIndicatorStatus(validId, validStatus);
     }
 
     AddIndicator(id, name, readyIcon = '✅', workingIcon = '⚠️', waitingIcon = '⛔') {
         if (!this._widget) return;
-        
+
         const appId = this._getCallerInfo();
-        
+
         // Rate limiting
         if (!this._checkRateLimit(appId)) {
             return;
         }
-        
+
         // Check indicator limit per application
         if (!this._checkIndicatorLimit(appId)) {
             return;
         }
-        
+
         // Input validation
         const validId = this._validateInput(id, 30);
         const validName = this._validateInput(name, 50);
         const validReadyIcon = this._validateInput(readyIcon, 10);
         const validWorkingIcon = this._validateInput(workingIcon, 10);
         const validWaitingIcon = this._validateInput(waitingIcon, 10);
-        
+
         // Ensure we have valid inputs
         if (!validId || !validName) {
             if (this._settings.get_boolean('enable-logging')) {
@@ -441,14 +441,14 @@ export default class StatusWidgetExtension extends Extension {
             }
             return;
         }
-        
+
         // Track indicator count for this application
         const currentCount = this._applicationLimits.get(appId) || 0;
         this._applicationLimits.set(appId, currentCount + 1);
-        
+
         const showLabels = this._settings.get_boolean('show-labels');
         this._widget.addIndicator(validId, validName, validReadyIcon, validWorkingIcon, validWaitingIcon, showLabels);
-        
+
         if (this._settings.get_boolean('enable-logging')) {
             console.log(`Added indicator '${validName}' (${validId}) from ${appId}`);
         }
@@ -456,34 +456,34 @@ export default class StatusWidgetExtension extends Extension {
 
     RemoveIndicator(id) {
         if (!this._widget) return;
-        
+
         const appId = this._getCallerInfo();
-        
+
         // Rate limiting
         if (!this._checkRateLimit(appId)) {
             return;
         }
-        
+
         // Input validation
         const validId = this._validateInput(id, 30);
-        
+
         if (!validId) {
             if (this._settings.get_boolean('enable-logging')) {
                 console.warn(`Invalid indicator ID for RemoveIndicator from ${appId}`);
             }
             return;
         }
-        
+
         // Decrease count for this application
         const currentCount = this._applicationLimits.get(appId) || 0;
         if (currentCount > 0) {
             this._applicationLimits.set(appId, currentCount - 1);
         }
-        
+
         this._widget.removeIndicator(validId);
-        
+
         if (this._settings.get_boolean('enable-logging')) {
             console.log(`Removed indicator ${validId} from ${appId}`);
         }
     }
-} 
+}

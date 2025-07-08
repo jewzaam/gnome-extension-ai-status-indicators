@@ -25,11 +25,11 @@ global.imports = {
                     this.visible = true;
                     this.tooltip_text = '';
                 }
-                
+
                 add_child(child) {
                     this.children.push(child);
                 }
-                
+
                 remove_child(child) {
                     const index = this.children.indexOf(child);
                     if (index > -1) {
@@ -51,11 +51,11 @@ global.imports = {
                     this.y_align = params.y_align;
                     this.style_class = params.style_class;
                 }
-                
+
                 set_text(text) {
                     this.text = text;
                 }
-                
+
                 get_text() {
                     return this.text;
                 }
@@ -156,11 +156,11 @@ global.PanelMenu = {
             this.children = [];
             this.visible = true;
         }
-        
+
         add_child(child) {
             this.children.push(child);
         }
-        
+
         destroy() {
             this.children = [];
         }
@@ -178,28 +178,28 @@ global.Extension = class MockExtension {
                 'show-labels': false
             },
             _connections: new Map(),
-            
+
             get_string(key) {
                 return this._data[key] || '';
             },
-            
+
             set_string(key, value) {
                 this._data[key] = value;
                 // Simulate signal emission
                 const connections = this._connections.get(`changed::${key}`) || [];
                 connections.forEach(callback => callback());
             },
-            
+
             get_boolean(key) {
                 return this._data[key] || false;
             },
-            
+
             set_boolean(key, value) {
                 this._data[key] = value;
                 const connections = this._connections.get(`changed::${key}`) || [];
                 connections.forEach(callback => callback());
             },
-            
+
             connect(signal, callback) {
                 if (!this._connections.has(signal)) {
                     this._connections.set(signal, []);
@@ -207,13 +207,13 @@ global.Extension = class MockExtension {
                 this._connections.get(signal).push(callback);
                 return this._connections.get(signal).length - 1;
             },
-            
+
             disconnect(id) {
                 // Simple mock - doesn't actually disconnect
             }
         };
     }
-    
+
     getSettings() {
         return this._settingsObject;
     }
@@ -228,4 +228,4 @@ global.console = {
     log: jest.fn(),
     error: jest.fn(),
     warn: jest.fn()
-}; 
+};

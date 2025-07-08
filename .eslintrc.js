@@ -42,9 +42,10 @@ module.exports = {
         'no-trailing-spaces': 'error',
         'eol-last': 'error',
         'comma-dangle': ['error', 'never'],
-        'brace-style': ['error', '1tbs'],
+        'brace-style': ['error', '1tbs', { 'allowSingleLine': true }],
         'keyword-spacing': 'error',
         'space-before-blocks': 'error',
-        'space-infix-ops': 'error'
+        'space-infix-ops': 'error',
+        'no-control-regex': 'off'
     }
 }; 

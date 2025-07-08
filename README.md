@@ -1,5 +1,7 @@
 # AI Status Indicators - GNOME Extension
 
+[![PR Checks](https://github.com/jewzaam/gnome-extension-ai-status-indicators/actions/workflows/pr-checks.yml/badge.svg)](https://github.com/jewzaam/gnome-extension-ai-status-indicators/actions/workflows/pr-checks.yml)
+
 A minimal GNOME Shell extension that displays configurable status indicators for background AI tools and processes. Designed to reduce context switching frustration when waiting for AI tools like Cursor, Claude, or Copilot to complete tasks.
 
 ## Table of Contents

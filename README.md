@@ -2,6 +2,49 @@
 
 A minimal GNOME Shell extension that displays configurable status indicators for background AI tools and processes. Designed to reduce context switching frustration when waiting for AI tools like Cursor, Claude, or Copilot to complete tasks.
 
+## Table of Contents
+
+- [Features](#features)
+- [Installation](#installation)
+  - [Quick Start](#quick-start)
+  - [Prerequisites](#prerequisites)
+  - [Manual Install](#manual-install)
+- [Usage](#usage)
+  - [Configuration](#configuration)
+    - [Adding Indicators](#adding-indicators)
+    - [Settings](#settings)
+  - [Programmatic Control](#programmatic-control)
+    - [Python Example](#python-example)
+    - [Shell Commands](#shell-commands)
+  - [Demo Script](#demo-script)
+- [Security](#security)
+  - [Security Features](#security-features)
+  - [Configurable Security Settings](#configurable-security-settings)
+  - [Remaining Limitations](#remaining-limitations)
+  - [Best Practices](#best-practices)
+  - [Security Monitoring](#security-monitoring)
+- [Use Cases](#use-cases)
+  - [AI Development Tools](#ai-development-tools)
+  - [Build Systems](#build-systems)
+  - [Background Processes](#background-processes)
+- [Integration Examples](#integration-examples)
+  - [VS Code Extension](#vs-code-extension)
+  - [Shell Script Integration](#shell-script-integration)
+- [Troubleshooting](#troubleshooting)
+  - [Extension Not Visible](#extension-not-visible)
+  - [D-Bus Commands Fail](#d-bus-commands-fail)
+  - [Settings Not Persisting](#settings-not-persisting)
+- [Development](#development)
+  - [File Structure](#file-structure)
+  - [Testing](#testing)
+    - [Test Coverage](#test-coverage)
+    - [Running Tests](#running-tests)
+    - [Test Limitations](#test-limitations)
+    - [Test Architecture](#test-architecture)
+    - [Development Workflow](#development-workflow)
+- [License](#license)
+- [Contributing](#contributing)
+
 ## Features
 
 - **Zero or more indicators**: Add/remove status indicators dynamically

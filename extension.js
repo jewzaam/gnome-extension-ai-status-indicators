@@ -3,7 +3,6 @@ import GObject from 'gi://GObject';
 import St from 'gi://St';
 import Clutter from 'gi://Clutter';
 import Gio from 'gi://Gio';
-import GLib from 'gi://GLib';
 
 import {Extension, gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
@@ -44,8 +43,49 @@ const StatusIndicator = GObject.registerClass(
                 this.add_child(this._textLabel);
             }
 
-            // Set tooltip to show indicator name
-            this.set_tooltip_text(this._name);
+            // Set up tooltip using GNOME Shell's official approach
+            this._setupTooltip();
+        }
+
+        _setupTooltip() {
+            // Create tooltip label using GNOME Shell's official approach
+            this._tooltipLabel = new St.Label({
+                style_class: 'tooltip-label',
+                text: this._name
+            });
+
+            // Add to chrome but keep hidden
+            Main.layoutManager.addChrome(this._tooltipLabel);
+            this._tooltipLabel.hide();
+
+            // Connect to this actor as label_actor (official GNOME Shell approach)
+            this.label_actor = this._tooltipLabel;
+
+            // Handle hover events for positioning
+            this.connect('notify::hover', this._onHoverChanged.bind(this));
+        }
+
+        _onHoverChanged() {
+            if (this.hover) {
+                // Position tooltip above the indicator
+                const [x, y] = this.get_transformed_position();
+                const [width] = this.get_transformed_size();
+
+                this._tooltipLabel.set_position(
+                    x + width / 2 - this._tooltipLabel.width / 2,
+                    y - this._tooltipLabel.height - 8
+                );
+                this._tooltipLabel.show();
+            } else {
+                this._tooltipLabel.hide();
+            }
+        }
+
+        _cleanup() {
+            if (this._tooltipLabel) {
+                Main.layoutManager.removeChrome(this._tooltipLabel);
+                this._tooltipLabel = null;
+            }
         }
 
         setStatus(status) {
@@ -100,7 +140,9 @@ const StatusIndicator = GObject.registerClass(
             }
 
             // Update tooltip with new name
-            this.set_tooltip_text(this._name);
+            if (this._tooltipLabel) {
+                this._tooltipLabel.set_text(this._name);
+            }
         }
     });
 
@@ -133,6 +175,7 @@ const StatusWidget = GObject.registerClass(
             const indicator = this._indicators.get(id);
             if (indicator) {
                 this._container.remove_child(indicator);
+                indicator._cleanup(); // Clean up tooltip
                 this._indicators.delete(id);
                 this._updateVisibility();
             }
@@ -161,6 +204,7 @@ const StatusWidget = GObject.registerClass(
         clearIndicators() {
             for (const [id, indicator] of this._indicators) {
                 this._container.remove_child(indicator);
+                indicator._cleanup(); // Clean up tooltip
             }
             this._indicators.clear();
             this._updateVisibility();

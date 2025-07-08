@@ -24,6 +24,18 @@ describe(`GNOME Shell ${GNOME_VERSION} Compatibility`, () => {
                 expect(boxLayout.set_tooltip_text).toBeUndefined();
             }
         });
+
+        test('should support label_actor tooltip approach across all versions', () => {
+            const boxLayout = new versionMocks.St.BoxLayout();
+            const tooltipLabel = new versionMocks.St.Label({ text: 'Test tooltip' });
+
+            // The label_actor approach works across all GNOME Shell versions
+            expect(() => {
+                boxLayout.label_actor = tooltipLabel;
+            }).not.toThrow();
+
+            expect(boxLayout.label_actor).toBe(tooltipLabel);
+        });
     });
 
     describe('Alignment constants', () => {
@@ -36,15 +48,20 @@ describe(`GNOME Shell ${GNOME_VERSION} Compatibility`, () => {
     });
 
     describe('Extension compatibility', () => {
-        test('should work without tooltip errors in GNOME 48+', () => {
-            // Mock a StatusIndicator-like class
+        test('should work without tooltip errors in all GNOME versions', () => {
+            // Mock a StatusIndicator-like class using the official approach
             class TestIndicator {
                 constructor() {
                     this.boxLayout = new versionMocks.St.BoxLayout();
+                    this.tooltipLabel = new versionMocks.St.Label({ text: '' });
                 }
 
                 setTooltip(text) {
-                    // Graceful degradation - only set tooltip if method exists
+                    // Use official label_actor approach (works in all versions)
+                    this.tooltipLabel.text = text;
+                    this.boxLayout.label_actor = this.tooltipLabel;
+
+                    // Fallback to set_tooltip_text if available (GNOME 45-47)
                     if (this.boxLayout.set_tooltip_text) {
                         this.boxLayout.set_tooltip_text(text);
                     }
@@ -58,6 +75,11 @@ describe(`GNOME Shell ${GNOME_VERSION} Compatibility`, () => {
                 indicator.setTooltip('Test tooltip');
             }).not.toThrow();
 
+            // label_actor approach should work in all versions
+            expect(indicator.boxLayout.label_actor).toBe(indicator.tooltipLabel);
+            expect(indicator.tooltipLabel.text).toBe('Test tooltip');
+
+            // set_tooltip_text should work in older versions
             if (config.hasTooltipText) {
                 expect(indicator.boxLayout.tooltip_text).toBe('Test tooltip');
             }

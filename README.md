@@ -75,6 +75,16 @@ To quickly see the extension in action:
    ./example-client.py
    ```
 
+### Uninstall
+
+To completely remove the extension:
+
+```bash
+./uninstall.sh
+```
+
+This will disable the extension and remove all files from your system.
+
 ### Prerequisites
 
 - GNOME Shell 45 or later
@@ -329,6 +339,7 @@ gnome-extension-ai-status-indicators/
 ├── schemas/              # GSettings schema
 │   └── org.gnome.shell.extensions.status-widget.gschema.xml
 ├── install.sh           # Installation script
+├── uninstall.sh         # Uninstallation script
 ├── example-client.py    # Demo script
 ├── package.json          # Test dependencies and scripts
 ├── run-tests.sh          # Test runner script

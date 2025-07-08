@@ -24,7 +24,7 @@ To quickly see the extension in action:
 2. Restart GNOME Shell (Alt+F2, type 'r', press Enter) or log out/in
 3. Enable the extension:
    ```bash
-   gnome-extensions enable ai-status-indicators@nmalik.github.io
+   gnome-extensions enable ai-status-indicators@jewzaam.github.io
    ```
 4. Run the demo client:
    ```bash
@@ -40,12 +40,12 @@ To quickly see the extension in action:
 
 1. Copy the extension files to your extensions directory:
    ```bash
-   mkdir -p ~/.local/share/gnome-shell/extensions/ai-status-indicators@nmalik.github.io
-   cp -r * ~/.local/share/gnome-shell/extensions/ai-status-indicators@nmalik.github.io/
+   mkdir -p ~/.local/share/gnome-shell/extensions/ai-status-indicators@jewzaam.github.io
+   cp -r * ~/.local/share/gnome-shell/extensions/ai-status-indicators@jewzaam.github.io/
    ```
 2. Compile the GSettings schema:
    ```bash
-   glib-compile-schemas ~/.local/share/gnome-shell/extensions/ai-status-indicators@nmalik.github.io/schemas/
+   glib-compile-schemas ~/.local/share/gnome-shell/extensions/ai-status-indicators@jewzaam.github.io/schemas/
    ```
 
 ## Usage
@@ -55,7 +55,7 @@ To quickly see the extension in action:
 Open the extension preferences to configure indicators:
 
 ```bash
-gnome-extensions prefs ai-status-indicators@nmalik.github.io
+gnome-extensions prefs ai-status-indicators@jewzaam.github.io
 ```
 
 Or through the Extensions app in GNOME Settings.
@@ -173,7 +173,7 @@ The extension implements comprehensive security measures to protect against mali
 
 ### Configurable Security Settings
 
-Access via: `gnome-extensions prefs ai-status-indicators@nmalik.github.io`
+Access via: `gnome-extensions prefs ai-status-indicators@jewzaam.github.io`
 
 - **Max Indicators per App** (1-20, default: 5)
 - **Rate Limit** (50-5000ms, default: 100ms) 
@@ -270,7 +270,7 @@ gdbus call --session --dest org.gnome.Shell \
 - Check D-Bus service: `gdbus introspect --session --dest org.gnome.Shell --object-path /org/gnome/shell/extensions/StatusWidget`
 
 ### Settings Not Persisting
-- Ensure GSettings schema is compiled: `glib-compile-schemas ~/.local/share/gnome-shell/extensions/status-widget@nmalik.github.io/schemas/`
+- Ensure GSettings schema is compiled: `glib-compile-schemas ~/.local/share/gnome-shell/extensions/ai-status-indicators@jewzaam.github.io/schemas/`
 - Check for schema errors: `journalctl -f | grep gnome-shell`
 
 ## Development
@@ -349,7 +349,7 @@ npm run test:coverage      # Coverage report
 ./install.sh
 
 # 2. Enable extension
-gnome-extensions enable status-widget@nmalik.github.io
+gnome-extensions enable ai-status-indicators@jewzaam.github.io
 
 # 3. Test D-Bus interface
 python3 example-client.py

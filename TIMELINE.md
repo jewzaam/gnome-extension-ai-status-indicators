@@ -163,7 +163,7 @@ find . -name "*.js" -o -name "*.py" -o -name "*.md" | xargs wc -l
 - **AI Requests:** 15+ interactions (parallel file updates)
 - **Features Added:**
   - Complete rebranding from "Status Widget" to "AI Status Indicators"
-  - Updated UUID: `ai-status-indicators@nmalik.github.io`
+  - Updated UUID: `ai-status-indicators@jewzaam.github.io`
   - Python requirements.txt with dbus-python==1.4.0
   - Comprehensive name updates across all files
 - **Files Modified:** 15 files (metadata.json, README.md, all source files)

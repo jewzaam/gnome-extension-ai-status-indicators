@@ -5,7 +5,7 @@ set -e
 
 # AI Status Indicators GNOME Extension Installation Script
 
-EXTENSION_UUID="ai-status-indicators@nmalik.github.io"
+EXTENSION_UUID="ai-status-indicators@jewzaam.github.io"
 EXTENSION_DIR="$HOME/.local/share/gnome-shell/extensions/$EXTENSION_UUID"
 
 echo "Installing AI Status Indicators GNOME Extension..."

@@ -3,12 +3,12 @@
 
 set -e
 
-# Status Widget GNOME Extension Installation Script
+# AI Status Indicators GNOME Extension Installation Script
 
-EXTENSION_UUID="status-widget@nmalik.github.io"
+EXTENSION_UUID="ai-status-indicators@nmalik.github.io"
 EXTENSION_DIR="$HOME/.local/share/gnome-shell/extensions/$EXTENSION_UUID"
 
-echo "Installing Status Widget GNOME Extension..."
+echo "Installing AI Status Indicators GNOME Extension..."
 
 # Create extension directory
 mkdir -p "$EXTENSION_DIR"

@@ -198,7 +198,7 @@ class TestStatusWidgetControllerInitialization(unittest.TestCase):
                         pass
                     
                     output = captured.getvalue()
-                    self.assertIn("Error connecting to Status Widget extension", output)
+                    self.assertIn("Error connecting to AI Status Indicators extension", output)
                     mock_exit.assert_called_with(1)
     
     def test_initialization_proxy_error(self):
@@ -215,7 +215,7 @@ class TestStatusWidgetControllerInitialization(unittest.TestCase):
                         pass
                     
                     output = captured.getvalue()
-                    self.assertIn("Error connecting to Status Widget extension", output)
+                    self.assertIn("Error connecting to AI Status Indicators extension", output)
                     mock_exit.assert_called_with(1)
 
 

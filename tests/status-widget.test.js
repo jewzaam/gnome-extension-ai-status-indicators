@@ -35,7 +35,7 @@ class MockStatusIndicator {
 // Create a simplified version of StatusWidget for testing
 class StatusWidget extends PanelMenu.Button {
     constructor() {
-        super(0.0, _("Status Widget"));
+        super(0.0, _("AI Status Indicators"));
 
         this._container = new St.BoxLayout({
             style_class: 'status-widget-container',

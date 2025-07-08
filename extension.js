@@ -100,7 +100,7 @@ class StatusIndicator extends St.BoxLayout {
 const StatusWidget = GObject.registerClass(
 class StatusWidget extends PanelMenu.Button {
     _init() {
-        super._init(0.0, _("Status Widget"));
+        super._init(0.0, _("AI Status Indicators"));
 
         this._container = new St.BoxLayout({
             style_class: 'status-widget-container',

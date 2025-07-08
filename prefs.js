@@ -104,7 +104,7 @@ export default class StatusWidgetPreferences extends ExtensionPreferences {
         
         // Main page
         const page = new Adw.PreferencesPage({
-            title: _('Status Widget'),
+            title: _('AI Status Indicators'),
             icon_name: 'applications-utilities-symbolic'
         });
 
@@ -116,7 +116,7 @@ export default class StatusWidgetPreferences extends ExtensionPreferences {
         // Position setting
         const positionRow = new Adw.ComboRow({
             title: _('Position'),
-            subtitle: _('Position of the status widget in the top bar'),
+            subtitle: _('Position of the AI status indicators in the top bar'),
             model: new Gtk.StringList({strings: [
                 _('Left'),
                 _('Center'),

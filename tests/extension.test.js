@@ -127,8 +127,8 @@ describe('StatusWidgetExtension', () => {
         Main.panel._rightBox.children = [];
         
         mockMetadata = {
-            uuid: 'status-widget@test',
-            name: 'Status Widget Test'
+            uuid: 'ai-status-indicators@test',
+            name: 'AI Status Indicators Test'
         };
         
         extension = new MockStatusWidgetExtension(mockMetadata);

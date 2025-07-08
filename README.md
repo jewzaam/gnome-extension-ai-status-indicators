@@ -1,4 +1,4 @@
-# Status Widget - GNOME Extension
+# AI Status Indicators - GNOME Extension
 
 A minimal GNOME Shell extension that displays configurable status indicators for background AI tools and processes. Designed to reduce context switching frustration when waiting for AI tools like Cursor, Claude, or Copilot to complete tasks.
 
@@ -24,7 +24,7 @@ To quickly see the extension in action:
 2. Restart GNOME Shell (Alt+F2, type 'r', press Enter) or log out/in
 3. Enable the extension:
    ```bash
-   gnome-extensions enable status-widget@nmalik.github.io
+   gnome-extensions enable ai-status-indicators@nmalik.github.io
    ```
 4. Run the demo client:
    ```bash
@@ -40,12 +40,12 @@ To quickly see the extension in action:
 
 1. Copy the extension files to your extensions directory:
    ```bash
-   mkdir -p ~/.local/share/gnome-shell/extensions/status-widget@nmalik.github.io
-   cp -r * ~/.local/share/gnome-shell/extensions/status-widget@nmalik.github.io/
+   mkdir -p ~/.local/share/gnome-shell/extensions/ai-status-indicators@nmalik.github.io
+   cp -r * ~/.local/share/gnome-shell/extensions/ai-status-indicators@nmalik.github.io/
    ```
 2. Compile the GSettings schema:
    ```bash
-   glib-compile-schemas ~/.local/share/gnome-shell/extensions/status-widget@nmalik.github.io/schemas/
+   glib-compile-schemas ~/.local/share/gnome-shell/extensions/ai-status-indicators@nmalik.github.io/schemas/
    ```
 
 ## Usage
@@ -55,7 +55,7 @@ To quickly see the extension in action:
 Open the extension preferences to configure indicators:
 
 ```bash
-gnome-extensions prefs status-widget@nmalik.github.io
+gnome-extensions prefs ai-status-indicators@nmalik.github.io
 ```
 
 Or through the Extensions app in GNOME Settings.
@@ -173,7 +173,7 @@ The extension implements comprehensive security measures to protect against mali
 
 ### Configurable Security Settings
 
-Access via: `gnome-extensions prefs status-widget@nmalik.github.io`
+Access via: `gnome-extensions prefs ai-status-indicators@nmalik.github.io`
 
 - **Max Indicators per App** (1-20, default: 5)
 - **Rate Limit** (50-5000ms, default: 100ms) 

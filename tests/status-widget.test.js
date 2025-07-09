@@ -38,7 +38,7 @@ class StatusWidget extends PanelMenu.Button {
         super(0.0, _('AI Status Indicators'));
 
         this._container = new St.BoxLayout({
-            style_class: 'status-widget-container',
+            style_class: 'ai-status-indicators-container',
             vertical: false
         });
 
@@ -116,7 +116,7 @@ describe('StatusWidget', () => {
         });
 
         test('should have container with correct style class', () => {
-            expect(widget._container.style_class).toBe('status-widget-container');
+            expect(widget._container.style_class).toBe('ai-status-indicators-container');
         });
     });
 

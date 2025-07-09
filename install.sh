@@ -21,7 +21,7 @@ cp stylesheet.css "$EXTENSION_DIR/"
 
 # Copy schemas
 mkdir -p "$EXTENSION_DIR/schemas"
-cp schemas/org.gnome.shell.extensions.status-widget.gschema.xml "$EXTENSION_DIR/schemas/"
+cp schemas/org.gnome.shell.extensions.ai-status-indicators.gschema.xml "$EXTENSION_DIR/schemas/"
 
 # Compile schema
 echo "Compiling GSettings schema..."

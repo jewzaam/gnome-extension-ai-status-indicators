@@ -24,7 +24,10 @@ const IndicatorRow = GObject.registerClass(
                 css_classes: ['flat', 'circular'],
                 valign: Gtk.Align.CENTER
             });
-            deleteButton.connect('clicked', () => this._onDelete(this._indicator.id));
+            deleteButton.connect('clicked', () => {
+                console.log(`Delete button clicked for indicator: ${this._indicator.id}`);
+                this._onDelete(this._indicator.id);
+            });
             this.add_suffix(deleteButton);
 
             // Edit button
@@ -102,8 +105,25 @@ const IndicatorRow = GObject.registerClass(
     });
 
 export default class StatusWidgetPreferences extends ExtensionPreferences {
+    constructor(metadata) {
+        super(metadata);
+        // Add unique session identifier to track preferences UI sessions
+        this.sessionId = Date.now();
+    }
+
+    _log(message, settings = null) {
+        const extensionId = settings ? settings.get_string('extension-id') : 'unknown';
+        console.log(`AI-STATUS-INDICATORS [EXT:${extensionId}|PREFS:${this.sessionId}] ${message}`);
+    }
+
+    _error(message, settings = null) {
+        const extensionId = settings ? settings.get_string('extension-id') : 'unknown';
+        console.error(`AI-STATUS-INDICATORS [EXT:${extensionId}|PREFS:${this.sessionId}] ${message}`);
+    }
+
     fillPreferencesWindow(window) {
         const settings = this.getSettings();
+        this._log('PREFS SESSION STARTED', settings);
 
         // Main page
         const page = new Adw.PreferencesPage({
@@ -239,6 +259,7 @@ export default class StatusWidgetPreferences extends ExtensionPreferences {
 
         // Connect to settings changes
         settings.connect('changed::indicators', () => {
+            this._log('Settings changed - reloading indicators');
             this._loadIndicators(settings, indicatorsGroup);
         });
     }
@@ -262,15 +283,27 @@ export default class StatusWidgetPreferences extends ExtensionPreferences {
         try {
             indicators = JSON.parse(indicatorsJson);
         } catch (e) {
-            console.error('Failed to parse indicators:', e);
+            this._error('Failed to parse indicators: ' + e.message, settings);
             return;
         }
 
         indicators.forEach(indicator => {
+            this._log(`Creating row for indicator: ${indicator.id} - ${indicator.name}`, settings);
             const row = new IndicatorRow(
                 indicator,
                 (indicator) => this._saveIndicators(settings, indicator),
-                (id) => this._deleteIndicator(settings, id)
+                (id) => {
+                    this._log(`Delete callback called for ID: ${id}`, settings);
+                    this._deleteIndicator(settings, id);
+                    // Manually trigger UI reload since settings change event isn't firing
+                    this._log('About to manually reload indicators after deletion', settings);
+                    try {
+                        this._loadIndicators(settings, group);
+                        this._log('Successfully reloaded indicators', settings);
+                    } catch (e) {
+                        this._error('Error reloading indicators: ' + e.message, settings);
+                    }
+                }
             );
             group.add(row);
         });
@@ -341,7 +374,7 @@ export default class StatusWidgetPreferences extends ExtensionPreferences {
         try {
             indicators = JSON.parse(indicatorsJson);
         } catch (e) {
-            console.error('Failed to parse indicators:', e);
+            this._error('Failed to parse indicators: ' + e.message, settings);
         }
 
         const id = Date.now().toString();
@@ -357,17 +390,28 @@ export default class StatusWidgetPreferences extends ExtensionPreferences {
     }
 
     _deleteIndicator(settings, id) {
+        this._log(`Attempting to delete indicator with ID: ${id}`, settings);
         const indicatorsJson = settings.get_string('indicators');
+        this._log(`Current indicators JSON: ${indicatorsJson}`, settings);
         let indicators = [];
         try {
             indicators = JSON.parse(indicatorsJson);
         } catch (e) {
-            console.error('Failed to parse indicators:', e);
+            this._error('Failed to parse indicators: ' + e.message, settings);
             return;
         }
 
+        this._log(`Parsed indicators: ${JSON.stringify(indicators)}`, settings);
         const filteredIndicators = indicators.filter(indicator => indicator.id !== id);
-        settings.set_string('indicators', JSON.stringify(filteredIndicators));
+        this._log(`Filtered indicators: ${JSON.stringify(filteredIndicators)}`, settings);
+        try {
+            settings.set_string('indicators', JSON.stringify(filteredIndicators));
+            this._log('Indicators updated in setting prefs', settings);
+        } catch (e) {
+            this._error('Error updating settings: ' + e.message, settings);
+            throw e;
+        }
+        this._log('_deleteIndicator method completed successfully', settings);
     }
 
     _saveIndicators(settings, editedIndicator) {
@@ -379,7 +423,7 @@ export default class StatusWidgetPreferences extends ExtensionPreferences {
         try {
             indicators = JSON.parse(indicatorsJson);
         } catch (e) {
-            console.error('Failed to parse indicators:', e);
+            this._error('Failed to parse indicators: ' + e.message, settings);
             return;
         }
 

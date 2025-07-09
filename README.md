@@ -339,7 +339,7 @@ gnome-extension-ai-status-indicators/
 ├── metadata.json         # Extension metadata
 ├── stylesheet.css        # Basic styling
 ├── schemas/              # GSettings schema
-│   └── org.gnome.shell.extensions.status-widget.gschema.xml
+│   └── org.gnome.shell.extensions.ai-status-indicators.gschema.xml
 ├── install.sh           # Installation script
 ├── uninstall.sh         # Uninstallation script
 ├── example-client.py    # Demo script

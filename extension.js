@@ -152,7 +152,7 @@ const StatusWidget = GObject.registerClass(
             super._init(0.0, _('AI Status Indicators'));
 
             this._container = new St.BoxLayout({
-                style_class: 'status-widget-container',
+                style_class: 'ai-status-indicators-container',
                 vertical: false
             });
 
@@ -218,6 +218,9 @@ const StatusWidget = GObject.registerClass(
 export default class StatusWidgetExtension extends Extension {
     constructor(metadata) {
         super(metadata);
+        // Extension lifecycle ID - changes only when extension reloads
+        this._extensionId = Date.now();
+        
         this._widget = null;
         this._settings = null;
         this._settingsConnections = [];
@@ -227,6 +230,11 @@ export default class StatusWidgetExtension extends Extension {
 
     enable() {
         this._settings = this.getSettings();
+        
+        // Store extension ID for preferences to access
+        this._settings.set_string('extension-id', this._extensionId.toString());
+        this._log(`EXTENSION ENABLED: ${this._extensionId}`);
+        
         this._widget = new StatusWidget();
 
         // Load initial indicators
@@ -247,6 +255,8 @@ export default class StatusWidgetExtension extends Extension {
     }
 
     disable() {
+        this._log(`EXTENSION DISABLED: ${this._extensionId}`);
+        
         // Disconnect settings
         this._settingsConnections.forEach(connection => {
             this._settings.disconnect(connection);
@@ -272,6 +282,14 @@ export default class StatusWidgetExtension extends Extension {
         this._settings = null;
     }
 
+    _log(message) {
+        console.log(`AI-STATUS-INDICATORS [EXT:${this._extensionId}] ${message}`);
+    }
+
+    _error(message) {
+        console.error(`AI-STATUS-INDICATORS [EXT:${this._extensionId}] ${message}`);
+    }
+
     _loadIndicators() {
         if (!this._widget || !this._settings) {
             return;
@@ -284,7 +302,7 @@ export default class StatusWidgetExtension extends Extension {
         try {
             indicators = JSON.parse(indicatorsJson);
         } catch (e) {
-            console.error('Failed to parse indicators configuration:', e);
+            this._error('Failed to parse indicators configuration: ' + e.message);
             return;
         }
 
@@ -302,6 +320,28 @@ export default class StatusWidgetExtension extends Extension {
                 showLabels
             );
         });
+    }
+
+    _saveIndicators() {
+        if (!this._widget || !this._settings) {
+            return;
+        }
+
+        // Get current indicators from the widget
+        const indicators = [];
+        for (const [id, indicator] of this._widget._indicators) {
+            indicators.push({
+                id: id,
+                name: indicator._name,
+                readyIcon: indicator._readyIcon,
+                workingIcon: indicator._workingIcon,
+                waitingIcon: indicator._waitingIcon
+            });
+        }
+
+        // Save to settings
+        const indicatorsJson = JSON.stringify(indicators);
+        this._settings.set_string('indicators', indicatorsJson);
     }
 
     _updatePosition() {
@@ -494,6 +534,9 @@ export default class StatusWidgetExtension extends Extension {
         const showLabels = this._settings.get_boolean('show-labels');
         this._widget.addIndicator(validId, validName, validReadyIcon, validWorkingIcon, validWaitingIcon, showLabels);
 
+        // Save indicators to settings
+        this._saveIndicators();
+
         if (this._settings.get_boolean('enable-logging')) {
             console.log(`Added indicator '${validName}' (${validId}) from ${appId}`);
         }
@@ -526,6 +569,9 @@ export default class StatusWidgetExtension extends Extension {
         }
 
         this._widget.removeIndicator(validId);
+
+        // Save indicators to settings
+        this._saveIndicators();
 
         if (this._settings.get_boolean('enable-logging')) {
             console.log(`Removed indicator ${validId} from ${appId}`);

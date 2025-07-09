@@ -11,5 +11,5 @@
   ],
   "version": 1,
   "url": "https://github.com/jewzaam/gnome-extension-ai-status-indicators",
-  "settings-schema": "org.gnome.shell.extensions.status-widget"
+  "settings-schema": "org.gnome.shell.extensions.ai-status-indicators"
 } 

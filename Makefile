@@ -25,6 +25,11 @@ help: ## Show this help message
 	@printf "  make test          # Run tests for all GNOME versions\n"
 	@printf "  make test-gnome48  # Run tests specifically for GNOME 48\n"
 	@printf "  make install       # Install the extension locally\n"
+	@printf "  make restart       # Install and restart GNOME Shell\n"
+	@printf "  make status        # Show current extension status\n"
+	@printf "  make enable        # Enable the extension\n"
+	@printf "  make nested-test   # Test extension in clean nested session\n"
+	@printf "  make nested-logs   # Monitor extension logs\n"
 
 .PHONY: deps
 deps: ## Install npm dependencies
@@ -84,6 +89,16 @@ install: ## Install the extension to local GNOME Shell extensions directory
 	chmod +x install.sh
 	./install.sh
 
+.PHONY: restart
+restart: install ## Install and reload extension (disable/enable cycle)
+	@printf "$(CYAN)Reloading extension...$(RESET)\n"
+	@printf "$(YELLOW)Disabling extension...$(RESET)\n"
+	@gnome-extensions disable ai-status-indicators@jewzaam.github.io || true
+	@sleep 1
+	@printf "$(YELLOW)Re-enabling extension...$(RESET)\n"
+	@gnome-extensions enable ai-status-indicators@jewzaam.github.io
+	@printf "$(GREEN)✓ Extension reloaded successfully$(RESET)\n"
+
 .PHONY: uninstall
 uninstall: ## Uninstall the extension from local GNOME Shell extensions directory
 	@printf "$(CYAN)Uninstalling extension...$(RESET)\n"
@@ -93,6 +108,100 @@ uninstall: ## Uninstall the extension from local GNOME Shell extensions director
 	fi
 	chmod +x uninstall.sh
 	./uninstall.sh
+
+.PHONY: status
+status: ## Show current status of the extension
+	@printf "$(CYAN)Extension Status:$(RESET)\n"
+	@printf "$(YELLOW)Checking extension status...$(RESET)\n"
+	@if gnome-extensions list --enabled | grep -q "ai-status-indicators@jewzaam.github.io"; then \
+		printf "$(GREEN)✓ Extension is enabled$(RESET)\n"; \
+	else \
+		printf "$(RED)✗ Extension is not enabled$(RESET)\n"; \
+	fi
+	@printf "\n$(YELLOW)Extension info:$(RESET)\n"
+	@gnome-extensions info ai-status-indicators@jewzaam.github.io || printf "$(RED)Extension not found$(RESET)\n"
+	@printf "\n$(YELLOW)Settings schema status:$(RESET)\n"
+	@if gsettings list-schemas | grep -q "org.gnome.shell.extensions.ai-status-indicators"; then \
+		printf "$(GREEN)✓ Settings schema is available$(RESET)\n"; \
+	else \
+		printf "$(RED)✗ Settings schema is not available$(RESET)\n"; \
+	fi
+
+.PHONY: enable
+enable: ## Enable the extension
+	@printf "$(CYAN)Enabling extension...$(RESET)\n"
+	@if gnome-extensions enable ai-status-indicators@jewzaam.github.io; then \
+		printf "$(GREEN)✓ Extension enabled successfully$(RESET)\n"; \
+	else \
+		printf "$(RED)✗ Failed to enable extension$(RESET)\n"; \
+		printf "$(YELLOW)Make sure the extension is installed first (run 'make install')$(RESET)\n"; \
+		exit 1; \
+	fi
+	@printf "\n$(YELLOW)Extension status:$(RESET)\n"
+	@gnome-extensions info ai-status-indicators@jewzaam.github.io || true
+
+.PHONY: nested-test
+nested-test: install ## Test extension in nested GNOME Shell session (manual)
+	@printf "$(CYAN)Preparing nested session test...$(RESET)\n"
+	@# Create extension package for nested session
+	@cd ~/.local/share/gnome-shell/extensions/ai-status-indicators@jewzaam.github.io && \
+	zip -r /tmp/ai-status-indicators-test.zip . && \
+	printf "$(GREEN)Extension package created: /tmp/ai-status-indicators-test.zip$(RESET)\n"
+	
+	@# Create helper script for nested session
+	@printf "$(YELLOW)Creating helper script...$(RESET)\n"
+	@echo '#!/bin/bash' > /tmp/nested-session-helper.sh
+	@echo 'echo "Installing extension in nested session..."' >> /tmp/nested-session-helper.sh
+	@echo 'gnome-extensions install --force /tmp/ai-status-indicators-test.zip' >> /tmp/nested-session-helper.sh
+	@echo 'echo "Enabling extension..."' >> /tmp/nested-session-helper.sh
+	@echo 'gnome-extensions enable ai-status-indicators@jewzaam.github.io' >> /tmp/nested-session-helper.sh
+	@echo 'echo "Opening preferences..."' >> /tmp/nested-session-helper.sh
+	@echo 'gnome-extensions prefs ai-status-indicators@jewzaam.github.io' >> /tmp/nested-session-helper.sh
+	@chmod +x /tmp/nested-session-helper.sh
+	
+	@printf "\n$(CYAN)=== Nested Session Test Instructions ===$(RESET)\n"
+	@printf "1. $(YELLOW)A nested GNOME Shell window will open$(RESET)\n"
+	@printf "2. $(YELLOW)Open terminal in the nested session (Activities > Terminal)$(RESET)\n"
+	@printf "3. $(YELLOW)Run: /tmp/nested-session-helper.sh$(RESET)\n"
+	@printf "4. $(YELLOW)Monitor logs in another terminal: journalctl -f --user -o cat | grep 'AI-STATUS-INDICATORS'$(RESET)\n"
+	@printf "\n$(GREEN)Press Enter to start nested session...$(RESET)\n"
+	@read dummy
+	
+	@# Start nested session with enhanced logging
+	G_MESSAGES_DEBUG=all SHELL_DEBUG=all dbus-run-session -- gnome-shell --nested --wayland
+
+.PHONY: nested-test-auto
+nested-test-auto: install ## Test extension in nested GNOME Shell session (automated)
+	@printf "$(CYAN)Automated nested session test...$(RESET)\n"
+	@# Create extension package
+	@cd ~/.local/share/gnome-shell/extensions/ai-status-indicators@jewzaam.github.io && \
+	zip -r /tmp/ai-status-indicators-test.zip . && \
+	printf "$(GREEN)Extension package created$(RESET)\n"
+	
+	@# Run automated test in nested session
+	@printf "$(YELLOW)Starting automated test...$(RESET)\n"
+	@printf "$(YELLOW)Monitor logs: journalctl -f --user -o cat | grep 'AI-STATUS-INDICATORS'$(RESET)\n"
+	@dbus-run-session bash -c ' \
+		echo "Starting nested shell in background..."; \
+		gnome-shell --nested --wayland & \
+		SHELL_PID=$$!; \
+		echo "Waiting for shell to initialize..."; \
+		sleep 15; \
+		echo "Installing extension..."; \
+		gnome-extensions install --force /tmp/ai-status-indicators-test.zip; \
+		echo "Enabling extension..."; \
+		gnome-extensions enable ai-status-indicators@jewzaam.github.io; \
+		echo "Extension should be running. Check logs for AI-STATUS-INDICATORS messages!"; \
+		echo "Nested shell PID: $$SHELL_PID"; \
+		echo "Press Ctrl+C to stop nested session"; \
+		wait $$SHELL_PID \
+	'
+
+.PHONY: nested-logs
+nested-logs: ## Monitor AI Status Indicators extension logs
+	@printf "$(CYAN)Monitoring AI Status Indicators logs...$(RESET)\n"
+	@printf "$(YELLOW)Press Ctrl+C to stop monitoring$(RESET)\n"
+	@journalctl -f --user -o cat | grep --line-buffered --color=always "AI-STATUS-INDICATORS"
 
 .PHONY: validate
 validate: deps ## Validate extension metadata and file consistency
@@ -139,6 +248,8 @@ dev: deps ## Set up development environment
 	@printf "  make test          # Run all tests\n"
 	@printf "  make watch         # Start test watcher\n"
 	@printf "  make install       # Install extension locally\n"
+	@printf "  make status        # Check extension status\n"
+	@printf "  make enable        # Enable extension\n"
 
 .PHONY: test-version
 test-version: ## Test a specific GNOME version (usage: make test-version VERSION=48)
